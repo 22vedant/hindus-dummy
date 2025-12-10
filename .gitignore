@@ -1,0 +1,5 @@
+node_modules
+service-*.json
+schema.json
+.env*
+dist
