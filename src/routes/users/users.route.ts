@@ -16,8 +16,8 @@ userRouter.post("/create", async (req, res) => {
     phoneNumber,
     password,
     displayName,
-    // photoURL,
     disabled,
+    role
   } = req.body;
 
   const userRecord = await getAuth().createUser({
@@ -26,17 +26,22 @@ userRouter.post("/create", async (req, res) => {
     phoneNumber,
     password,
     displayName,
-    // photoURL,
+    // photoURL: "",
     disabled,
   });
 
   const userDoc = {
     uid: userRecord.uid,
     email: userRecord.email,
+    displayName: userRecord.displayName ?? null,
+    role,
+    photoURL: "",
     emailVerified: userRecord.emailVerified,
     phoneNumber: userRecord.phoneNumber ?? null,
-    displayName: userRecord.displayName ?? null,
     disabled: userRecord.disabled,
+    owns: [],
+    subscribedTo: [],
+    signInDate: new Date(),
     createdAt: new Date(),
   };
 
@@ -61,5 +66,7 @@ userRouter.delete("/delete", async (req, res) => {
     response,
   });
 });
+
+//user update
 
 export default userRouter;

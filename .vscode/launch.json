@@ -1,36 +1,26 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen",
-            "name": "nodemon",
-            "program": "${workspaceFolder}/src/index.ts",
-            "request": "launch",
-            "restart": true,
-            "runtimeExecutable": "nodemon",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "type": "node"
-        },
-        {
-            "command": "npm run start:debug",
-            "name": "Run npm start:debug",
-            "request": "launch",
-            "type": "node-terminal"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${file}"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug (Nodemon + TS + ESM)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "nodemon",
+      "runtimeArgs": [
+        "--config",
+        "nodemon.json"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      // "protocol": "inspector",
+      "restart": true,
+      "autoAttachChildProcesses": true,
+      "env": {
+        "NODE_ENV": "development",
+        "FIRESTORE_EMULATOR_HOST": "localhost:8080",
+        "FIREBASE_AUTH_EMULATOR_HOST": "localhost:9099",
+        "FIREBASE_STORAGE_EMULATOR_HOST": "localhost:9199"
+      }
+    }
+  ]
 }

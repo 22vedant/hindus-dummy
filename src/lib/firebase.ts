@@ -10,7 +10,7 @@ dotenv.config();
 
 export const firebaseApp = initializeApp({
   credential: cert(serviceAccount),
-  projectId: process.env.FIREBASE_PROJECT_ID as string,
+  projectId: "first-test-12cd8",
   storageBucket: "first-test-12cd8.firebasestorage.app",
 });
 
