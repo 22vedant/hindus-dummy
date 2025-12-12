@@ -46,6 +46,12 @@ contentRouter.post("/create",
       const token = authHeader.split(" ")[1];
       const decoded = await getAuth().verifyIdToken(token!);
       const uid = decoded.uid;
+      const userRef = await getFirestore().collection("users").doc(uid).get()
+      if (userRef.data()?.role !== "ADMIN") {
+        return res.status(403).json({
+          message: "You are forbidden"
+        })
+      }
 
       const filename = Date.now() + "-" + req.file.originalname;
       const blob = getStorage().bucket().file(filename);

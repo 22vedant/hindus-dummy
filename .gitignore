@@ -3,3 +3,5 @@ service-*.json
 schema.json
 .env*
 dist
+firebase-debug.log
+firestore-debug.log
