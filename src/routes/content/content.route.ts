@@ -5,6 +5,8 @@ import multer, { memoryStorage } from "multer";
 import { getStorage } from "firebase-admin/storage";
 import dotenv from "dotenv";
 import { FieldValue, getFirestore, type DocumentData } from "firebase-admin/firestore";
+import { isAdmin, userAuthMiddleware } from "../../middleware.ts";
+import type { authMiddlewareInfoRequest } from "../../lib/types/index.ts";
 dotenv.config();
 const upload = multer({ storage: memoryStorage() });
 /**
@@ -30,28 +32,16 @@ contentRouter.get("/", (req, res) => {
   });
 });
 
-contentRouter.post("/create",
+contentRouter.post("/create", userAuthMiddleware, isAdmin,
   upload.single("file"),
-  async (req: Request, res: Response) => {
+  async (req: authMiddlewareInfoRequest, res: Response) => {
     try {
-      const authHeader = req.get("authorization");
-      if (!authHeader?.startsWith("Bearer ")) {
-        return res.status(401).send("Missing or invalid token");
-      }
 
       if (!req.file) {
         return res.status(400).send("No file uploaded.");
       }
 
-      const token = authHeader.split(" ")[1];
-      const decoded = await getAuth().verifyIdToken(token!);
-      const uid = decoded.uid;
-      const userRef = await getFirestore().collection("users").doc(uid).get()
-      if (userRef.data()?.role !== "ADMIN") {
-        return res.status(403).json({
-          message: "You are forbidden"
-        })
-      }
+      const uid = req.uid;
 
       const filename = Date.now() + "-" + req.file.originalname;
       const blob = getStorage().bucket().file(filename);
@@ -90,7 +80,7 @@ contentRouter.post("/create",
         };
 
         const contentRef = await getFirestore().collection("content").add(contentRecord);
-        await getFirestore().collection("users").doc(uid).update({
+        await getFirestore().collection("users").doc(uid!).update({
           owns: FieldValue.arrayUnion(contentRef.id)
         })
 
@@ -114,34 +104,24 @@ contentRouter.post("/create",
 );
 
 // update-content route
-contentRouter.post("/update/:contentid", async (req: Request, res: Response) => {
+contentRouter.post("/update", userAuthMiddleware, isAdmin, async (req: authMiddlewareInfoRequest, res: Response) => {
   try {
-    const authHeader = req.get("authorization");
-    const contentId = req.params.contentid
-    console.log(contentId);
-
-    if (!authHeader?.startsWith("Bearer ")) {
-      return res.status(401).send("Missing or invalid token");
-    }
-    const token = authHeader.split(" ")[1];
-    const decoded = await getAuth().verifyIdToken(token!);
-    const uid = decoded.uid;
+    const contentId = req.query.contentid as string
+    const uid = req.uid as string
     console.log(uid);
 
     const body = req.body
-
-    console.log(body);
-
+    if (body === null) {
+      return res.status(400).json({
+        message: "Body cannot be empty when trying to update records"
+      })
+    }
 
     const userSnapshot = (await getFirestore().collection("users").doc(uid)?.get())?.data()
 
-    // if (!userSnapshot?.exists) {
-    //   return res.status(404).send("User not found")
-    // }
-
     const ownedContentIds: string[] = Object.values(userSnapshot!['owns']) ?? []
 
-    if (!ownedContentIds.includes(contentId!)) {
+    if (!ownedContentIds.includes(contentId)) {
       return res.status(404).json({
         message: "Content document not found"
       })
@@ -152,7 +132,7 @@ contentRouter.post("/update/:contentid", async (req: Request, res: Response) => 
         updatedAt: new Date(),
         updatedBy: uid
       }
-      const updateResponse = await getFirestore().collection("content")?.doc(contentId!)?.update(newBody)
+      const updateResponse = await getFirestore().collection("content")?.doc(contentId)?.update(newBody)
       return res.status(200).json({
         message: "Updated successfully"
       })
@@ -221,25 +201,13 @@ contentRouter.post("/update/image/:contentid", upload.single("file"), async (req
   }
 })
 
-contentRouter.get("/data", async (req: Request, res: Response) => {
+contentRouter.get("/data", userAuthMiddleware, async (req: authMiddlewareInfoRequest, res: Response) => {
   try {
     const type = req.query.type;
     const hiddenOrNot = req.query.hidden
     const language = req.query.language
 
-    console.log(type);
-    console.log(hiddenOrNot);
-
-
-    const authHeader = req.get("authorization");
-
-    if (!authHeader?.startsWith("Bearer ")) {
-      return res.status(401).send("Missing or invalid token");
-    }
-
-    const token = authHeader.split(" ")[1];
-    const decoded = await getAuth().verifyIdToken(token!);
-    const uid = decoded.uid;
+    const uid = req.uid;
 
     const contentRef = getFirestore().collection("content")
     const contentSnapshot = await contentRef

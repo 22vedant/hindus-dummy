@@ -1,11 +1,9 @@
 import { Router, type Request, type Response } from "express";
 import { getAuth, type DecodedIdToken } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
-import { userAuthMiddleware } from "../../middewares/users.middleware.ts";
-interface authMiddlewareInfoRequest extends Request {
-  uid?: string;
-  decoded?: DecodedIdToken;
-}
+import { userAuthMiddleware, userCreationBodyChecker } from "../../middleware.ts";
+import type { authMiddlewareInfoRequest } from "../../lib/types/index.ts";
+
 const userRouter = Router();
 
 userRouter.get("/", (req: Request, res: Response) => {
@@ -15,32 +13,24 @@ userRouter.get("/", (req: Request, res: Response) => {
   });
 });
 
-userRouter.post("/create", async (req, res) => {
-  const {
-    email,
-    emailVerified,
-    phoneNumber,
-    password,
-    displayName,
-    disabled,
-    role
-  } = req.body;
+userRouter.post("/create", userCreationBodyChecker, async (req, res) => {
+  const body = req.body
 
   const userRecord = await getAuth().createUser({
-    email,
-    emailVerified,
-    phoneNumber,
-    password,
-    displayName,
+    email: body.email,
+    emailVerified: body.emailVerified,
+    phoneNumber: body.phoneNumber,
+    password: body.password,
+    displayName: body.displayName,
     // photoURL: "",
-    disabled,
+    disabled: body.displayName ?? false,
   });
 
   const userDoc = {
     uid: userRecord.uid,
     email: userRecord.email,
     displayName: userRecord.displayName ?? null,
-    role,
+    role: body.role,
     photoURL: "",
     emailVerified: userRecord.emailVerified,
     phoneNumber: userRecord.phoneNumber ?? null,
@@ -58,29 +48,6 @@ userRouter.post("/create", async (req, res) => {
 });
 
 
-userRouter.use(userAuthMiddleware)
-userRouter.get("/delete", async (req: authMiddlewareInfoRequest, res) => {
-  // const body = req.body();
-  // const authHeader = req.get("authorization");
-  // if (!authHeader?.startsWith("Bearer ")) {
-  //   return res.status(401).send("Missing or invalid token");
-  // }
-
-  // const token = authHeader.split(" ")[1];
-  // const decoded = await getAuth().verifyIdToken(token!);
-  const uid = req.uid
-  // // const response = await getAuth().deleteUser(uid);
-  console.log(uid);
-
-  // getFirestore().collection("users").doc(uid).delete();
-  res.json({
-    message: "inside content route",
-    uid: req.uid
-    // response,
-  });
-});
-
-//user update
 userRouter.post("/create2", async (req, res) => {
   try {
     const auth = getAuth();
@@ -149,5 +116,19 @@ userRouter.post("/create2", async (req, res) => {
   }
 });
 
+userRouter.use(userAuthMiddleware)
+userRouter.delete("/delete", async (req: authMiddlewareInfoRequest, res: Response) => {
+  const body = req.body();
+  const uid = req.uid as string
+  const response = await getAuth().deleteUser(uid!);
+  // console.log(uid);
+
+  await getFirestore().collection("users").doc(uid).delete();
+  res.json({
+    message: "User Deleted Successfully",
+    uid: req.uid
+    // response,
+  });
+});
 
 export default userRouter;
