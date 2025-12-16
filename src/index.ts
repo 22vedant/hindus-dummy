@@ -1,23 +1,32 @@
 import express from "express";
 const app = express();
+import { apiReference } from '@scalar/express-api-reference'
 
 import contentRouter from "./routes/content/content.route.ts";
 import userRouter from "./routes/users/users.route.ts";
 import quizRouter from "./routes/quiz/quiz.route.ts";
 import { firebaseApp } from "./lib/firebase.ts";
-// import { userAuthMiddleware } from "./middewares/users.middleware.ts"
+import * as swaggerDoc from "./swagger-output.json" with { type: "json" }
+import path from "path"
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 firebaseApp
 app.use(express.json());
-// app.use(firebaseApp);
-app.get("/", (req, res) => {
-  console.log("hello");
 
-  return res.json({
-    message: "ok",
-  });
-});
-// app.use(userAuthMiddleware)
+app.use('/swagger', express.static(path.join(__dirname)))
+
+app.use('/reference', apiReference({
+  url: "/swagger/swagger-output.json",
+  hideDarkModeToggle: true,
+  theme: 'deepSpace',
+  title: 'Hindus R Us Api',
+  slug: 'hindus-r-us-api',
+  layout: "classic",
+  showDeveloperTools: "never"
+}))
 
 app.use("/v1/users", userRouter);
 app.use("/v1/content", contentRouter);

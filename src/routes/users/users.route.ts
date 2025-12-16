@@ -1,12 +1,13 @@
 import { Router, type Request, type Response } from "express";
-import { getAuth, type DecodedIdToken } from "firebase-admin/auth";
+import { getAuth, UserRecord, type DecodedIdToken } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { userAuthMiddleware, userCreationBodyChecker } from "../../middleware.ts";
-import type { authMiddlewareInfoRequest } from "../../lib/types/index.ts";
+import type { authMiddlewareInfoRequest, myUserRecord } from "../../lib/types/index.ts";
 
 const userRouter = Router();
 
 userRouter.get("/", (req: Request, res: Response) => {
+  // #swagger.tags = ['Users']
   res.json({
     message: "inside user route",
 
@@ -14,41 +15,124 @@ userRouter.get("/", (req: Request, res: Response) => {
 });
 
 userRouter.post("/create", userCreationBodyChecker, async (req, res) => {
-  const body = req.body
+  // #swagger.tags = ['Users']
+  // #swagger.summary = 'Create User'
+  // #swagger.description = 'An API route to create users on Firebase'
+  /*  #swagger.requestBody = {
+              required: true,
+              content: {
+                  "application/json": {
+                      schema: {
+                          $ref: "#/components/schemas/CreateBodyRequest"
+                      },
+                  }
+              }
+          } 
+      */
+  /* #swagger.responses[200] = {
+     description: "Success",
+     content: {
+         "application/json": {
+             schema:{
+                 $ref: "#/components/schemas/ErrorResponse"
+             },
+             example: {
+                success: true,
+                message: "Ok",
+                errorCode: "200"
+             }
+         }           
+     }
+ }   
+     #swagger.responses[400] = {
+     description: "Bad Request",
+     content: {
+         "application/json": {
+             schema:{
+                 $ref: "#/components/schemas/ErrorResponse"
+             },
+             example: {
+                success: true,
+                message: "Bad Request",
+                errorCode: "400"
+             }
+         }           
+     }
+ }   
+*/
+  try {
+    const body = req.body
 
-  const userRecord = await getAuth().createUser({
-    email: body.email,
-    emailVerified: body.emailVerified,
-    phoneNumber: body.phoneNumber,
-    password: body.password,
-    displayName: body.displayName,
-    // photoURL: "",
-    disabled: body.displayName ?? false,
-  });
+    const user: myUserRecord = {
+      email: body.email,
+      emailVerified: body.emailVerified ?? false,
+      password: body.password,
+      displayName: body.displayName,
+      disabled: body.disabled ?? false,
+    }
 
-  const userDoc = {
-    uid: userRecord.uid,
-    email: userRecord.email,
-    displayName: userRecord.displayName ?? null,
-    role: body.role,
-    photoURL: "",
-    emailVerified: userRecord.emailVerified,
-    phoneNumber: userRecord.phoneNumber ?? null,
-    disabled: userRecord.disabled,
-    owns: [],
-    subscribedTo: [],
-    signInDate: new Date(),
-    createdAt: new Date(),
-  };
+    if (req.body?.phoneNumber) {
+      user.phoneNumber = req.body.phoneNumber
+    }
 
-  getFirestore().collection("users").doc(userRecord.uid).create(userDoc);
-  res.json({
-    message: "Created successfully",
-  });
+    const userRecord = await getAuth().createUser(user);
+
+    const userDoc = {
+      uid: userRecord.uid,
+      email: userRecord.email,
+      displayName: userRecord.displayName ?? null,
+      role: body.role,
+      photoURL: "",
+      emailVerified: userRecord.emailVerified,
+      phoneNumber: userRecord.phoneNumber ?? null,
+      disabled: userRecord.disabled,
+      owns: [],
+      subscribedTo: [],
+      signInDate: new Date(),
+      createdAt: new Date(),
+    };
+
+    getFirestore().collection("users").doc(userRecord.uid).create(userDoc);
+    res.json({
+      message: "Created successfully",
+    });
+  } catch (error: any) {
+    return res.status(400).json({
+      message: error.message
+    })
+  }
 });
 
 
 userRouter.post("/create2", async (req, res) => {
+  // #swagger.tags = ['Users']
+  // #swagger.summary = 'Create User'
+  // #swagger.description = 'An Alternate API route to create users as well as update'
+  /*  #swagger.requestBody = {
+              required: true,
+              content: {
+                  "application/json": {
+                      schema: {
+                          $ref: "#/components/schemas/CreateBodyRequest"
+                      },
+                      example: { 
+                        $ref: "#/components/examples/CreateBodyExample"
+                    }
+                  }
+              }
+          } 
+      */
+  /* #swagger.responses[200] = {
+     description: "Success",
+     content: {
+         "application/json": {
+             schema:{
+                 $ref: "#/components/schemas/CreateBodyResponse"
+             }
+         }           
+     }
+ }   
+*/
   try {
     const auth = getAuth();
     const db = getFirestore();
@@ -118,7 +202,10 @@ userRouter.post("/create2", async (req, res) => {
 
 userRouter.use(userAuthMiddleware)
 userRouter.delete("/delete", async (req: authMiddlewareInfoRequest, res: Response) => {
-  const body = req.body();
+  // #swagger.tags = ['Users']
+  /* #swagger.security = [{
+           "bearerAuth": []
+   }] */
   const uid = req.uid as string
   const response = await getAuth().deleteUser(uid!);
   // console.log(uid);

@@ -9,24 +9,12 @@ import { isAdmin, userAuthMiddleware } from "../../middleware.ts";
 import type { authMiddlewareInfoRequest } from "../../lib/types/index.ts";
 dotenv.config();
 const upload = multer({ storage: memoryStorage() });
-/**
- * {
-   "uid": "string",
-   "title": "string",
-   "description": "string",
-   "language": "string",
-   "thumbnail_url_link": "string",
-   "createdBy": "string",
-   "updatedBy": "string",
-   "createdAt": "string",
-   "updatedAt": "string",
-   // "owner": "uid",
-   "type": "string",
-   "hidden": false
- },
- */
 
 contentRouter.get("/", (req, res) => {
+  // #swagger.tags = ['Content']
+  // #swagger.summary = 'Test Content'
+  // #swagger.description = 'An API route to test content route'
+
   res.json({
     message: "inside content route",
   });
@@ -36,6 +24,24 @@ contentRouter.post("/create", userAuthMiddleware, isAdmin,
   upload.single("file"),
   async (req: authMiddlewareInfoRequest, res: Response) => {
     try {
+      // #swagger.tags = ['Content']
+      /* #swagger.security = [{
+           "bearerAuth": []
+      }] 
+       #swagger.summary = 'Create Content'
+       #swagger.description = 'An API route to create content - Uploads a file, stores it in Firebase Storage, and creates a content record in Firestore.'
+       #swagger.requestBody = {
+              required: true,
+              content: {
+                  "multipart/form-data": {
+                      schema: {
+                          $ref: "#/components/schemas/CreateContentBody"
+                      },
+                      
+                  }
+              }
+          } 
+      */
 
       if (!req.file) {
         return res.status(400).send("No file uploaded.");
@@ -105,6 +111,34 @@ contentRouter.post("/create", userAuthMiddleware, isAdmin,
 
 // update-content route
 contentRouter.post("/update", userAuthMiddleware, isAdmin, async (req: authMiddlewareInfoRequest, res: Response) => {
+  // #swagger.tags = ['Content']
+  /* #swagger.security = [{
+       "bearerAuth": []
+  }] 
+   #swagger.summary = 'Update Content'
+   #swagger.description = 'An API route to update content.'
+   #swagger.requestBody = {
+          required: true,
+          content: {
+              "application/json": {
+                  schema: {
+                      $ref: "#/components/schemas/UpdateContentBody"
+                  },
+                  
+              }
+          }
+      }
+    #swagger.responses[200] = {
+            description: "Some description...",
+            content: {
+                "application/json": {
+                    schema:{
+                        $ref: "#/components/schemas/User"
+                    }
+                }           
+            }
+        }    
+  */
   try {
     const contentId = req.query.contentid as string
     const uid = req.uid as string
@@ -145,11 +179,44 @@ contentRouter.post("/update", userAuthMiddleware, isAdmin, async (req: authMiddl
 });
 
 //update-image route
-contentRouter.post("/update/image/:contentid", upload.single("file"), async (req: Request, res: Response) => {
+contentRouter.post("/update/image", upload.single("file"), async (req: Request, res: Response) => {
+  // #swagger.tags = ['Content']
+  /* #swagger.security = [{
+       "bearerAuth": []
+  }] 
+   #swagger.summary = 'Update Image'
+   #swagger.description = 'An API route to add a new image in Firebase Storage, and change the thumbnailUrlLink in content collection.'
+   #swagger.requestBody = {
+          required: true,
+          content: {
+              "multipart/form-data": {
+                  schema: {
+                      $ref: "#/components/schemas/UpdateImageBody"
+                  },
+                  
+              }
+          }
+      }
+    #swagger.responses[200] = {
+            description: "Some description...",
+            content: {
+                "application/json": {
+                    schema:{
+                        $ref: "#/components/schemas/User"
+                    }
+                }           
+            }
+        }
+            
+     #swagger.parameters['contentId'] = {
+        in: 'query',
+        description: 'The contentId of the content being updated',
+        required: true,
+}
+  */
   try {
     const authHeader = req.get("authorization");
-    const contentId = req.params.contentid
-    console.log(contentId);
+    const contentId = req.query.contentId as string
 
     if (!authHeader?.startsWith("Bearer ")) {
       return res.status(401).send("Missing or invalid token");
@@ -157,11 +224,8 @@ contentRouter.post("/update/image/:contentid", upload.single("file"), async (req
     const token = authHeader.split(" ")[1];
     const decoded = await getAuth().verifyIdToken(token!);
     const uid = decoded.uid;
-    console.log(uid);
 
     const filename = Date.now() + "-" + req.file?.originalname;
-    console.log(filename);
-
     const blob = getStorage().bucket().file(filename);
 
     const stream = blob.createWriteStream({
@@ -169,20 +233,15 @@ contentRouter.post("/update/image/:contentid", upload.single("file"), async (req
         contentType: req.file!.mimetype,
       },
     });
-    console.log(blob.bucket.name)
-    console.log(stream);
-
 
     stream.on("error", (err) => {
-      console.error(err);
       return res.status(500).send("Upload failed");
     });
 
     stream.on("finish", async () => {
       const publicUrl = `http://127.0.0.1:9199/v0/b/${blob.bucket.name}/o/${encodeURIComponent(filename)}?alt=media`;
-      console.log(publicUrl);
 
-      await getFirestore().collection("content")?.doc(contentId!)?.update({
+      await getFirestore().collection("content")?.doc(contentId)?.update({
         thumbnailUrlLink: publicUrl
       })
 
@@ -202,6 +261,32 @@ contentRouter.post("/update/image/:contentid", upload.single("file"), async (req
 })
 
 contentRouter.get("/data", userAuthMiddleware, async (req: authMiddlewareInfoRequest, res: Response) => {
+  // #swagger.tags = ['Content']
+  /* #swagger.security = [{
+      "bearerAuth": []
+  }] */
+
+  /* #swagger.parameters['type'] = {
+      in: 'query',
+      description: 'Type of content to filter',
+      required: true,
+      example: 'educational'
+  } */
+
+  /* #swagger.parameters['hidden'] = {
+      in: 'query',
+      description: 'Whether hidden content should be included',
+      required: true,
+      example: 'false'
+  } */
+
+  /* #swagger.parameters['language'] = {
+      in: 'query',
+      description: 'Language of the content',
+      required: true,
+      example: 'english'
+  } */
+
   try {
     const type = req.query.type;
     const hiddenOrNot = req.query.hidden
