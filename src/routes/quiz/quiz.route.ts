@@ -1,11 +1,9 @@
 import { Router, type Request, type Response } from "express";
-import dotenv from "dotenv"
 import { getAuth } from "firebase-admin/auth";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
-import { isAdmin, quizCreateBodyChecker, quizQuestionsCreateChecker, userAuthMiddleware } from "../../middleware.ts";
+import { isAdmin, quizCreateBodyChecker, quizQuestionsCreateChecker, userAuthMiddleware } from "../../middleware.js";
 import type { authMiddlewareInfoRequest } from "../../lib/types/index.ts";
-
-dotenv.config();
+import { db } from "../../lib/firebase.js";
 
 const quizRouter = Router()
 
@@ -54,7 +52,7 @@ quizRouter.post('/create', userAuthMiddleware, isAdmin, quizCreateBodyChecker, a
         const quizSize = body.numberOfQuestions;
 
         // Fetch all questions
-        const questionSnapshot = await getFirestore().collection("questions").get();
+        const questionSnapshot = await db.collection("questions").get();
         const questionIdArray: string[] = [];
         questionSnapshot.forEach((doc) => {
             questionIdArray.push(doc.id);
@@ -92,7 +90,7 @@ quizRouter.post('/create', userAuthMiddleware, isAdmin, quizCreateBodyChecker, a
             attempts: 0
         };
 
-        const quizSnapshot = await getFirestore().collection("quiz").add(quizDoc);
+        const quizSnapshot = await db.collection("quiz").add(quizDoc);
         return res.status(200).json({
             message: "Quiz created successfully",
             status_code: 200,
@@ -154,7 +152,7 @@ quizRouter.post("/questions/create", userAuthMiddleware, isAdmin, quizQuestionsC
             createdAt: new Date()
         }
 
-        await getFirestore().collection("questions").add(questionsDoc)
+        await db.collection("questions").add(questionsDoc)
         return res.status(200).json({
             message: "Questions added successfully"
         })
@@ -220,7 +218,7 @@ quizRouter.post(
                 return res.status(400).json({ message: "Quiz Id is missing" });
             }
 
-            const quizSnapshot = await getFirestore()
+            const quizSnapshot = await db
                 .collection("quiz")
                 .doc(quizId)
                 .get();
@@ -235,10 +233,10 @@ quizRouter.post(
             const quizQuestions: string[] = quizData?.questions || [];
 
             const questionRefs = quizQuestions.map((qid: string) =>
-                getFirestore().collection("questions").doc(qid)
+                db.collection("questions").doc(qid)
             );
 
-            const questionDocs = await getFirestore().getAll(...questionRefs);
+            const questionDocs = await db.getAll(...questionRefs);
 
             const correctAnswers = questionDocs
                 .filter(doc => doc.exists)
@@ -299,16 +297,16 @@ quizRouter.post(
 
             }
 
-            const userDoc = await getFirestore().collection("users").doc(uid!).get();
+            const userDoc = await db.collection("users").doc(uid!).get();
             const attempts = userDoc.data()?.attemptedQuizes?.[quizId]?.attemptCount || 0;
             if (attempts >= quizData?.maxAttempts) {
                 return res.status(403).json({ message: "Max attempts reached" });
             }
 
-            const submissionResponse = await getFirestore().collection("quizSubmission").add(quizSubmissionDoc)
+            const submissionResponse = await db.collection("quizSubmission").add(quizSubmissionDoc)
             const submissionId = submissionResponse.id
 
-            await getFirestore()
+            await db
                 .collection("users")
                 .doc(uid!)
                 .set(
@@ -382,7 +380,7 @@ quizRouter.get("/result", userAuthMiddleware, async (req: authMiddlewareInfoRequ
             return res.status(400).json({ message: "Missing Credentials" });
         }
 
-        const quizSubmissionSnapshot = await getFirestore().collection("quizSubmission").doc(submissionId).get()
+        const quizSubmissionSnapshot = await db.collection("quizSubmission").doc(submissionId).get()
         const quizSubmissionData = quizSubmissionSnapshot.data()
 
         if (quizSubmissionData?.quizId !== quizId) {

@@ -1,9 +1,11 @@
 import { Router, type Request, type Response } from "express";
 import { getAuth, UserRecord, type DecodedIdToken } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
-import { userAuthMiddleware, userCreationBodyChecker } from "../../middleware.ts";
+import { userAuthMiddleware, userCreationBodyChecker } from "../../middleware.js";
 import type { authMiddlewareInfoRequest, myUserRecord } from "../../lib/types/index.ts";
-
+import { db } from "../../lib/firebase.js";
+import dotenv from "dotenv"
+dotenv.config()
 const userRouter = Router();
 
 userRouter.get("/", (req: Request, res: Response) => {
@@ -87,12 +89,12 @@ userRouter.post("/create", userCreationBodyChecker, async (req, res) => {
       phoneNumber: userRecord.phoneNumber ?? null,
       disabled: userRecord.disabled,
       owns: [],
-      subscribedTo: [],
+      subscribedTo: body.subscribedTo,
       signInDate: new Date(),
       createdAt: new Date(),
     };
 
-    getFirestore().collection("users").doc(userRecord.uid).create(userDoc);
+    getFirestore("h-dummy-db").collection("users").doc(userRecord.uid).create(userDoc);
     res.json({
       message: "Created successfully",
     });
@@ -103,6 +105,73 @@ userRouter.post("/create", userCreationBodyChecker, async (req, res) => {
   }
 });
 
+userRouter.post('/generateId', async (req, res) => {
+  // #swagger.tags = ['Users']
+  // #swagger.summary = 'Fetch User Details'
+  // #swagger.description = 'An API route to fetch user details from Identity platform'
+  /*  #swagger.requestBody = {
+              required: true,
+              content: {
+                  "application/json": {
+                      schema: {
+                          $ref: "#/components/schemas/IdGenSchema"
+                      },
+                  }
+              }
+          } 
+      */
+  /* #swagger.responses[200] = {
+     description: "Success",
+     content: {
+         "application/json": {
+             schema:{
+                 $ref: "#/components/schemas/ErrorResponse"
+             },
+             example: {
+                success: true,
+                message: "Ok",
+                errorCode: "200"
+             }
+         }           
+     }
+ }   
+     #swagger.responses[400] = {
+     description: "Bad Request",
+     content: {
+         "application/json": {
+             schema:{
+                 $ref: "#/components/schemas/ErrorResponse"
+             },
+             example: {
+                success: true,
+                message: "Bad Request",
+                errorCode: "400"
+             }
+         }           
+     }
+ }   
+*/
+  try {
+    const body = {
+      email: req.body.email,
+      password: req.body.password,
+      returnSecureToken: req.body.returnSecureToken
+    }
+    const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.MY_API_KEY}`, {
+      method: 'POST',
+      body: JSON.stringify(body)
+    })
+
+    return res.status(200).json({
+      message: "success",
+      response
+    })
+  } catch (error) {
+    return res.status(500).json({
+      error
+    })
+  }
+})
 
 userRouter.post("/create2", async (req, res) => {
   // #swagger.tags = ['Users']
@@ -135,7 +204,6 @@ userRouter.post("/create2", async (req, res) => {
 */
   try {
     const auth = getAuth();
-    const db = getFirestore();
     const { email, ...rest } = req.body;
 
     let user;
@@ -210,7 +278,7 @@ userRouter.delete("/delete", async (req: authMiddlewareInfoRequest, res: Respons
   const response = await getAuth().deleteUser(uid!);
   // console.log(uid);
 
-  await getFirestore().collection("users").doc(uid).delete();
+  await db.collection("users").doc(uid).delete();
   res.json({
     message: "User Deleted Successfully",
     uid: req.uid

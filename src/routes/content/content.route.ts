@@ -5,8 +5,9 @@ import multer, { memoryStorage } from "multer";
 import { getStorage } from "firebase-admin/storage";
 import dotenv from "dotenv";
 import { FieldValue, getFirestore, type DocumentData } from "firebase-admin/firestore";
-import { isAdmin, userAuthMiddleware } from "../../middleware.ts";
+import { isAdmin, userAuthMiddleware } from "../../middleware.js";
 import type { authMiddlewareInfoRequest } from "../../lib/types/index.ts";
+import { db } from "../../lib/firebase.js";
 dotenv.config();
 const upload = multer({ storage: memoryStorage() });
 
@@ -49,7 +50,7 @@ contentRouter.post("/create", userAuthMiddleware, isAdmin,
 
       const uid = req.uid;
 
-      const filename = Date.now() + "-" + req.file.originalname;
+      const filename = `h-dummy-files/${Date.now()}-${req.file.originalname}`;
       const blob = getStorage().bucket().file(filename);
 
       const stream = blob.createWriteStream({
@@ -65,12 +66,11 @@ contentRouter.post("/create", userAuthMiddleware, isAdmin,
 
       stream.on("finish", async () => {
         let publicUrl;
-        if (process.env.NODE_ENV === 'development') {
-          publicUrl = `http://127.0.0.1:9199/v0/b/${blob.bucket.name}/o/${encodeURIComponent(filename)}?alt=media`;
-        } else {
-          publicUrl = `https://firebasestorage.googleapis.com/v0/b/${blob.bucket.name}/o/${encodeURIComponent(filename)}?alt=media`
-        }
-
+        // if (process.env.NODE_ENV === 'development') {
+        //   publicUrl = `http://127.0.0.1:9199/v0/b/${blob.bucket.name}/o/${encodeURIComponent(filename)}?alt=media`;
+        // } else {
+        publicUrl = `https://empdata-bf69b.appspot.com/v0/b/${blob.bucket.name}/o/${encodeURIComponent(filename)}`
+        // }
 
         const contentRecord = {
           title: req.body.title ?? "",
@@ -85,8 +85,8 @@ contentRouter.post("/create", userAuthMiddleware, isAdmin,
           hidden: req.body.hidden as boolean ?? false,
         };
 
-        const contentRef = await getFirestore().collection("content").add(contentRecord);
-        await getFirestore().collection("users").doc(uid!).update({
+        const contentRef = await db.collection("content").add(contentRecord);
+        await db.collection("users").doc(uid!).update({
           owns: FieldValue.arrayUnion(contentRef.id)
         })
 
@@ -151,7 +151,7 @@ contentRouter.post("/update", userAuthMiddleware, isAdmin, async (req: authMiddl
       })
     }
 
-    const userSnapshot = (await getFirestore().collection("users").doc(uid)?.get())?.data()
+    const userSnapshot = (await db.collection("users").doc(uid)?.get())?.data()
 
     const ownedContentIds: string[] = Object.values(userSnapshot!['owns']) ?? []
 
@@ -166,7 +166,7 @@ contentRouter.post("/update", userAuthMiddleware, isAdmin, async (req: authMiddl
         updatedAt: new Date(),
         updatedBy: uid
       }
-      const updateResponse = await getFirestore().collection("content")?.doc(contentId)?.update(newBody)
+      const updateResponse = await db.collection("content")?.doc(contentId)?.update(newBody)
       return res.status(200).json({
         message: "Updated successfully"
       })
@@ -225,7 +225,7 @@ contentRouter.post("/update/image", upload.single("file"), async (req: Request, 
     const decoded = await getAuth().verifyIdToken(token!);
     const uid = decoded.uid;
 
-    const filename = Date.now() + "-" + req.file?.originalname;
+    const filename = `h-dummy-files/${Date.now()}-${req.file?.originalname}`;
     const blob = getStorage().bucket().file(filename);
 
     const stream = blob.createWriteStream({
@@ -239,9 +239,10 @@ contentRouter.post("/update/image", upload.single("file"), async (req: Request, 
     });
 
     stream.on("finish", async () => {
-      const publicUrl = `http://127.0.0.1:9199/v0/b/${blob.bucket.name}/o/${encodeURIComponent(filename)}?alt=media`;
+      let publicUrl;
+      publicUrl = `https://empdata-bf69b.appspot.com/v0/b/${blob.bucket.name}/o/${encodeURIComponent(filename)}`
 
-      await getFirestore().collection("content")?.doc(contentId)?.update({
+      await db.collection("content")?.doc(contentId)?.update({
         thumbnailUrlLink: publicUrl
       })
 
@@ -294,7 +295,7 @@ contentRouter.get("/data", userAuthMiddleware, async (req: authMiddlewareInfoReq
 
     const uid = req.uid;
 
-    const contentRef = getFirestore().collection("content")
+    const contentRef = db.collection("content")
     const contentSnapshot = await contentRef
       .where('type', '==', type)
       .where('hidden', '==', hiddenOrNot)

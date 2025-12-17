@@ -12,7 +12,7 @@ export const userAuthMiddleware = async (req: authMiddlewareInfoRequest, res: Re
 
         const token = authHeader.split(" ")[1];
         const decoded = await getAuth().verifyIdToken(token!);
-        const uid = decoded.uid
+        const uid = decoded.sub
         req.uid = uid
         next()
     } catch (error: unknown) {
@@ -23,7 +23,7 @@ export const userAuthMiddleware = async (req: authMiddlewareInfoRequest, res: Re
 }
 
 export const isAdmin = async (req: authMiddlewareInfoRequest, res: Response, next: NextFunction) => {
-    const userRef = await getFirestore().collection("users").doc(req.uid!).get()
+    const userRef = await getFirestore("h-dummy-db").collection("users").doc(req.uid!).get()
     if (userRef.data()?.role !== "ADMIN") {
         return res.status(403).json({
             message: "You are forbidden"
@@ -63,7 +63,7 @@ export const userCreationBodyChecker = async (
     res: Response,
     next: NextFunction
 ) => {
-    const requiredFields = ['email', 'password', 'displayName', 'role'];
+    const requiredFields = ['email', 'password', 'displayName', 'role', 'subscribedTo'];
 
     for (const field of requiredFields) {
         if (!req.body?.[field]) {

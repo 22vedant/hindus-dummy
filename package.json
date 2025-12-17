@@ -2,14 +2,14 @@
   "name": "hindus-r-us",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "serve": "nodemon",
     "build": "npx tsc",
     "dev": "npx tsc && nodemon dist/index.js",
     "inspect": "node --inspect src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "swagger": "node src/swagger.ts"
+    "swagger": "node dist/swagger.js"
   },
   "keywords": [],
   "author": "",
