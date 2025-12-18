@@ -1,9 +1,9 @@
 import { Router, type Request, type Response } from "express";
 import { getAuth, UserRecord, type DecodedIdToken } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
-import { userAuthMiddleware, userCreationBodyChecker } from "../../middleware.js";
+import { userAuthMiddleware, userCreationBodyChecker } from "../../middleware.ts";
 import type { authMiddlewareInfoRequest, myUserRecord } from "../../lib/types/index.ts";
-import { db } from "../../lib/firebase.js";
+import { db } from "../../lib/firebase.ts";
 import dotenv from "dotenv"
 dotenv.config()
 const userRouter = Router();

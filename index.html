@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <h3>FCM Token Generator</h3>
+    <button id="enable">Enable Notifications</button>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+
+        const firebaseConfig = {};
+
+        const app = initializeApp(firebaseConfig);
+        const messaging = getMessaging(app);
+
+        document.getElementById("enable").addEventListener("click", async () => {
+            const registration = await navigator.serviceWorker.register(
+                "/firebase-messaging-sw.js"
+            );
+
+            const permission = await Notification.requestPermission();
+            if (permission !== "granted") {
+                console.error("Permission denied");
+                return;
+            }
+
+            const token = await getToken(messaging, {
+                vapidKey: "BEvGL05N5_X9fR12yvw0jWueRw2urddoJmVrw2l02JfMRx9qqR3jt9vl7vtNoGWbI6e1wWNTiiAl_6pniMoEI9Q",
+                serviceWorkerRegistration: registration
+            });
+
+            console.log("🔥 FCM TOKEN:", token);
+        });
+    </script>
+</body>
+
+</html>

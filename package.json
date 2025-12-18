@@ -9,7 +9,7 @@
     "dev": "npx tsc && nodemon dist/index.js",
     "inspect": "node --inspect src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "swagger": "node dist/swagger.js"
+    "swagger": "node src/swagger.ts"
   },
   "keywords": [],
   "author": "",

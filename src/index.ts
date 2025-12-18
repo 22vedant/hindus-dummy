@@ -9,7 +9,7 @@ import { firebaseApp } from "./lib/firebase.js";
 import * as swaggerDoc from "./swagger-output.json" with { type: "json" }
 import path from "path"
 import { fileURLToPath } from "url";
-const PORT = Number(process.env.PORT) || 8080;
+const PORT = Number(process.env.PORT) || 3000;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

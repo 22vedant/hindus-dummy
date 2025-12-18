@@ -7,7 +7,10 @@
   },
   "servers": [
     {
-      "url": "http://localhost:3000"
+      "url": "http://localhost:8080"
+    },
+    {
+      "url": "https://h-dummy-app-express-app-182702284982.asia-south1.run.app/"
     }
   ],
   "paths": {
@@ -69,6 +72,60 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateBodyRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/generateId": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Fetch User Details",
+        "description": "An API route to fetch user details from Identity platform",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": true,
+                  "message": "Ok",
+                  "errorCode": "200"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": true,
+                  "message": "Bad Request",
+                  "errorCode": "400"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdGenSchema"
               }
             }
           }
@@ -595,7 +652,63 @@
   },
   "components": {
     "schemas": {
-      "ErrorResponse": {
+      "IdGenSchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "johndoe@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "password"
+          },
+          "returnSecureToken": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "returnSecureToken"
+        ]
+      },
+      "ErrorResponse2xx": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Ok"
+          },
+          "status_code": {
+            "type": "string",
+            "example": "200"
+          }
+        }
+      },
+      "ErrorResponse4xx": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Ok"
+          },
+          "status_code": {
+            "type": "string",
+            "example": "200"
+          }
+        }
+      },
+      "ErrorResponse5xx": {
         "type": "object",
         "properties": {
           "success": {
