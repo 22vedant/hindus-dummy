@@ -1,31 +1,23 @@
 {
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    // File Layout
-    "rootDir": "src",
-    "outDir": "dist",
-    "allowJs": true,
     "module": "nodenext",
     "target": "esnext",
-    "types": [],
-    "sourceMap": true,
-    "declaration": true,
-    "allowImportingTsExtensions": true,
-    "emitDeclarationOnly": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    "moduleResolution": "nodenext",
     "strict": true,
-    "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
     "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "allowJs": true,
+    // "noUncheckedIndexedAccess": true,
+    // "exactOptionalPropertyTypes": true,
+    // "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
+    "types": [],
     "skipLibCheck": true,
-    // "moduleResolution": "bundler"
   },
   "include": [
-    "src",
-    "src/middleware.ts"
+    "src"
   ],
   "exclude": [
     "functions"

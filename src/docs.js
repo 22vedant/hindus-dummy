@@ -1,5 +1,3 @@
-// import type { OAS3Definition } from "swagger-jsdoc";
-
 export const doc = {
     info: {
         version: '1.0.0',

@@ -3,15 +3,16 @@ import { onRequest } from "firebase-functions/https";
 import { getMessaging } from "firebase-admin/messaging";
 
 import { user } from "firebase-functions/v1/auth";
-// import admin from "firebase-admin"
-import { onSchedule, ScheduleOptions } from "firebase-functions/v2/scheduler";
+import { onSchedule, type ScheduleOptions } from "firebase-functions/v2/scheduler";
 import { logger } from "firebase-functions";
+import { initializeApp } from "firebase-admin/app"
 import dotenv from "dotenv"
 
-import { initializeApp } from "firebase-admin/app"
 dotenv.config()
 const app = initializeApp({ projectId: 'empdata-bf69b' })
 const messaging = getMessaging(app)
+import sgMail from '@sendgrid/mail'
+sgMail.setApiKey(process.env.SENDGRID_API_KEY as string)
 
 interface quizGenBody {
     title: string
@@ -110,7 +111,7 @@ export const daily6PMQuizGenEnglish = onSchedule(
 
 export const manualSendMessage = onRequest(async (_request, response): Promise<void> => {
     try {
-        const tokens = ['cEbpTlmNkNxUTQhpk7WM06:APA91bHc6m30xUi4sQCnoH90E8nUpSOg4axnXTnesuDOUc68y0deZ6Q7wXqI2Bn5FUxUgLxg4ZDTgWku4iRQI5Z45zj_ywzkjGzgZbMuD6HTlMsu3XXeIlc', 'dEh0k7XqLCLLWi5P-xyvYB:APA91bEVu49wXrknCFvkqCxAQ-eJg8xURrHly18WXfu01e04aOCA8mab00PEoNkIbS0WdZi5MQIdSEMX3RbteWnA0zhCEbqSg7XRm10hkSxSWfRWIUw5Lak']
+        const tokens = ['dEh0k7XqLCLLWi5P-xyvYB:APA91bHKmylsm1boqszkV4Cqe3cD1wE8TIXIGthARb4VUtO9jD_wE4xhzGx5MNuCQNqKfF4DxGRp84PHQ_avmVxK5WiDsee0QyGsOcuyoeAzccAZLb42R6M']
         const message = {
             notification: {
                 title: "New Quiz Available",
@@ -129,10 +130,26 @@ export const manualSendMessage = onRequest(async (_request, response): Promise<v
                     failedTokens.push(tokens[index])
                 }
             })
+            logger.error(`These tokens failed`, failedTokens)
         }
 
-        logger.info("Sent message successfully");
-        logger.error(`These tokens failed`, failedTokens)
+        let emailsArray: string[] = []
+
+        // getFirestore("h-dummy-db").collection("mailingList")
+        const userSnapShot = (await getFirestore().collection("mailingLists").doc("A").get()).data()
+        emailsArray = userSnapShot?.emails
+
+        const mailMessage = {
+            to: emailsArray, // Change to your recipient
+            from: 'vedant.chinta@zingworks.co', // Change to your verified sender
+            subject: 'Daily Quiz Generated',
+            text: 'A new quiz is generated just for you based on your subscription',
+            html: '<strong>A new quiz is generated just for you based on your subscription</strong>',
+        }
+
+        await sgMail.sendMultiple(mailMessage)
+
+        logger.info("Sent message successfully & mail send successfully");
         response.status(200).json({
             message: "Successfully sent the message"
         })

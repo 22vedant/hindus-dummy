@@ -1,9 +1,9 @@
 import { Router, type Request, type Response } from "express";
 import { getAuth, UserRecord, type DecodedIdToken } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
-import { userAuthMiddleware, userCreationBodyChecker } from "../../middleware.ts";
-import type { authMiddlewareInfoRequest, myUserRecord } from "../../lib/types/index.ts";
-import { db } from "../../lib/firebase.ts";
+import { userAuthMiddleware, userCreationBodyChecker } from "../../middleware.js";
+import type { authMiddlewareInfoRequest, myUserRecord } from "../../lib/types/index.js";
+import { db } from "../../lib/firebase.js";
 import dotenv from "dotenv"
 dotenv.config()
 const userRouter = Router();
@@ -94,7 +94,7 @@ userRouter.post("/create", userCreationBodyChecker, async (req, res) => {
       createdAt: new Date(),
     };
 
-    getFirestore("h-dummy-db").collection("users").doc(userRecord.uid).create(userDoc);
+    getFirestore().collection("users").doc(userRecord.uid).create(userDoc);
     res.json({
       message: "Created successfully",
     });

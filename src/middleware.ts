@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { getAuth, type DecodedIdToken } from "firebase-admin/auth";
-import type { authMiddlewareInfoRequest } from "./lib/types/index.ts";
+import type { authMiddlewareInfoRequest } from "./lib/types/index.js";
 import { getFirestore } from "firebase-admin/firestore";
 
 export const userAuthMiddleware = async (req: authMiddlewareInfoRequest, res: Response, next: NextFunction) => {
