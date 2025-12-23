@@ -1,14 +1,16 @@
+import crypto from "crypto"
 import { Router, type Request, type Response } from "express";
 import { getAuth, UserRecord, type DecodedIdToken } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
-import { userAuthMiddleware, userCreationBodyChecker } from "../../middleware.js";
-import type { authMiddlewareInfoRequest, myUserRecord } from "../../lib/types/index.js";
-import { db } from "../../lib/firebase.js";
+import { userAuthMiddleware, userCreationBodyChecker } from "../../../middleware.js";
+import type { authMiddlewareInfoRequest, myUserRecord } from "../../../lib/types/index.js";
+import { db } from "../../../lib/firebase.js";
 import dotenv from "dotenv"
+import { generateApiKeyV1, generateApiKeyV2 } from "../../../lib/api-key-gen.ts";
 dotenv.config()
 const userRouter = Router();
 
-userRouter.get("/", (req: Request, res: Response) => {
+userRouter.get("/asd", (req: Request, res: Response) => {
   // #swagger.tags = ['Users']
   res.json({
     message: "inside user route",
@@ -173,101 +175,6 @@ userRouter.post('/generateId', async (req, res) => {
   }
 })
 
-userRouter.post("/create2", async (req, res) => {
-  // #swagger.tags = ['Users']
-  // #swagger.summary = 'Create User'
-  // #swagger.description = 'An Alternate API route to create users as well as update'
-  /*  #swagger.requestBody = {
-              required: true,
-              content: {
-                  "application/json": {
-                      schema: {
-                          $ref: "#/components/schemas/CreateBodyRequest"
-                      },
-                      example: { 
-                        $ref: "#/components/examples/CreateBodyExample"
-                    }
-                  }
-              }
-          } 
-      */
-  /* #swagger.responses[200] = {
-     description: "Success",
-     content: {
-         "application/json": {
-             schema:{
-                 $ref: "#/components/schemas/CreateBodyResponse"
-             }
-         }           
-     }
- }   
-*/
-  try {
-    const auth = getAuth();
-    const { email, ...rest } = req.body;
-
-    let user;
-    try {
-      user = await auth.getUserByEmail(email);
-    } catch (err: any) {
-      if (err.code !== "auth/user-not-found") {
-        return res.status(500).send("Error checking user");
-      }
-      if (err.code == "auth/phone-number-already-exists") {
-        return res.status(409).json({
-          message: "User already exists for this phone number"
-        })
-      }
-    }
-
-    if (user) {
-      await auth.updateUser(user.uid, rest);
-
-      await db.collection("users").doc(user.uid).set(
-        {
-          ...rest,
-          updatedAt: new Date(),
-        },
-        { merge: true }
-      );
-
-      return res.status(200).json({ message: "User updated successfully" });
-    }
-
-    const newUser = await auth.createUser({
-      email: req.body.email,
-      emailVerified: req.body.emailVerified,
-      phoneNumber: req.body.phoneNumber,
-      password: req.body.password,
-      displayName: req.body.displayName,
-      disabled: req.body.disabled,
-    });
-
-    const userDoc = {
-      uid: newUser.uid,
-      email: newUser.email,
-      displayName: newUser.displayName ?? null,
-      role: req.body.role,
-      photoURL: "",
-      emailVerified: newUser.emailVerified,
-      phoneNumber: newUser.phoneNumber ?? null,
-      disabled: newUser.disabled || false,
-      owns: [],
-      subscribedTo: [],
-      signInDate: new Date(),
-      createdAt: new Date(),
-    };
-
-    await db.collection("users").doc(newUser.uid).set(userDoc);
-
-    return res.json({ message: "User created successfully" });
-
-  } catch (error) {
-    console.error(error);
-    return res.status(500).send("Server error");
-  }
-});
-
 userRouter.use(userAuthMiddleware)
 userRouter.delete("/delete", async (req: authMiddlewareInfoRequest, res: Response) => {
   // #swagger.tags = ['Users']
@@ -285,5 +192,42 @@ userRouter.delete("/delete", async (req: authMiddlewareInfoRequest, res: Respons
     // response,
   });
 });
+
+userRouter.get('/api-key-gen', async (req: authMiddlewareInfoRequest, res: Response) => {
+  try {
+    const uid = req.uid
+    const apiVersion = req.query.apiVersion as string
+    // const baseApiVersion = (req.baseUrl).toString().slice(2, 3)
+    const userRef = await getFirestore().collection("users").doc(uid!)
+    const userSnapshot = await userRef.get();
+    let apiKey = ""
+    if (!userSnapshot.data()?.apiKeyHash) {
+      if (apiVersion === '2') {
+        apiKey = generateApiKeyV2()
+      } else {
+        apiKey = generateApiKeyV1()
+      }
+      const apiKeyHash = crypto.createHash("sha256").update(apiKey).digest("hex")
+      userRef.update({
+        apiKeyHash,
+        createdAt: new Date()
+      })
+
+      return res.status(200).json({
+        apiKey
+      })
+    }
+
+    return res.status(409).json({
+      message: "You have already generated an API key. Please contact support to rotate/regenerate the key.",
+    })
+
+  } catch (error: any) {
+    return res.status(500).json({
+      message: error.message
+    })
+  }
+
+})
 
 export default userRouter;

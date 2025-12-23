@@ -111,7 +111,7 @@ export const daily6PMQuizGenEnglish = onSchedule(
 
 export const manualSendMessage = onRequest(async (_request, response): Promise<void> => {
     try {
-        const tokens = ['dEh0k7XqLCLLWi5P-xyvYB:APA91bHKmylsm1boqszkV4Cqe3cD1wE8TIXIGthARb4VUtO9jD_wE4xhzGx5MNuCQNqKfF4DxGRp84PHQ_avmVxK5WiDsee0QyGsOcuyoeAzccAZLb42R6M']
+        const tokens = ['dEh0k7XqLCLLWi5P-xyvYB:APA91bGaUgLbQBSMppRkK4srpeUyxqP1-Kq0K5Isg-Nb9Td4uGdoiN-PE5t-2m6mb_5bPMPyf6QBTsixL07ZO5cgaHMCN-aiqe9N2dVCY2iiqiw6VU_eKVw']
         const message = {
             notification: {
                 title: "New Quiz Available",

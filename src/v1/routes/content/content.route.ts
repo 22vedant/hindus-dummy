@@ -5,9 +5,9 @@ import multer, { memoryStorage } from "multer";
 import { getStorage } from "firebase-admin/storage";
 import dotenv from "dotenv";
 import { FieldValue, getFirestore, type DocumentData } from "firebase-admin/firestore";
-import { isAdmin, userAuthMiddleware } from "../../middleware.js";
-import type { authMiddlewareInfoRequest } from "../../lib/types/index.js";
-import { db } from "../../lib/firebase.js";
+import { apiKeyChecker, isAdmin, userAuthMiddleware } from "../../../middleware.js";
+import type { authMiddlewareInfoRequest } from "../../../lib/types/index.js";
+import { db } from "../../../lib/firebase.js";
 dotenv.config();
 const upload = multer({ storage: memoryStorage() });
 
@@ -21,7 +21,7 @@ contentRouter.get("/", (req, res) => {
   });
 });
 
-contentRouter.post("/create", userAuthMiddleware, isAdmin,
+contentRouter.post("/create", userAuthMiddleware, apiKeyChecker, isAdmin,
   upload.single("file"),
   async (req: authMiddlewareInfoRequest, res: Response) => {
     try {

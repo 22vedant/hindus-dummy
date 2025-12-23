@@ -19,8 +19,9 @@ let firebase1;
 // }
 
 export const firebaseApp = initializeApp({
-  credential: applicationDefault(),
-  projectId: "empdata-bf69b"
+  credential: cert(serviceAccount),
+  projectId: "empdata-bf69b",
+  storageBucket: "empdata-bf69b.appspot.com",
 })
 
 export const db = getFirestore(firebaseApp)
