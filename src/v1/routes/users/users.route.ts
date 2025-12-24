@@ -6,7 +6,7 @@ import { userAuthMiddleware, userCreationBodyChecker } from "../../../middleware
 import type { authMiddlewareInfoRequest, myUserRecord } from "../../../lib/types/index.js";
 import { db } from "../../../lib/firebase.js";
 import dotenv from "dotenv"
-import { generateApiKeyV1, generateApiKeyV2 } from "../../../lib/api-key-gen.ts";
+import { generateApiKeyV1, generateApiKeyV2 } from "../../../lib/utils.ts";
 dotenv.config()
 const userRouter = Router();
 

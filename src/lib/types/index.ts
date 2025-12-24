@@ -16,3 +16,9 @@ export interface myUserRecord {
     disabled?: boolean
     phoneNumber?: string
 }
+
+export interface User {
+    uid: string
+    role?: string
+    email?: string
+}
