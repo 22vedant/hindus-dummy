@@ -4,9 +4,8 @@ import { apiReference } from '@scalar/express-api-reference'
 import { firebaseApp } from "./lib/firebase.ts";
 import path from "path"
 import { fileURLToPath } from "url";
-import { v1Router } from "./v1/v1.index.ts";
-import { v2Router } from "./v2/v2.index.ts";
-const PORT = Number(process.env.PORT) || 3000;
+import { v1Router } from "./routes/v1/v1.index.ts";
+import { v2Router } from "./routes/v2/v2.index.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

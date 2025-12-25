@@ -1,5 +1,4 @@
-import { Router, type Request, type Response } from "express";
-import { getAuth } from "firebase-admin/auth";
+import { Router, type Response } from "express";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { isAdmin, quizCreateBodyChecker, quizQuestionsCreateChecker, userAuthMiddleware } from "@/middlewares/middleware.ts";
 import type { authMiddlewareInfoRequest } from "@/lib/types/index.ts";

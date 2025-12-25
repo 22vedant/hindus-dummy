@@ -1,0 +1,1 @@
+# write a script to seed the local emulator database and storage bucket with initially testing values

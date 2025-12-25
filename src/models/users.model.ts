@@ -1,0 +1,59 @@
+import { db } from "@/lib/firebase.ts"
+import { getAuth } from "firebase-admin/auth";
+import crypto from "crypto"
+import type { myUserRecord } from "@/lib/types/index.ts"
+import { generateApiKeyV1 } from "@/lib/utils.ts";
+export class UsersModal {
+    private collection = db.collection("users")
+
+    async createUser(body: myUserRecord) {
+        const user: myUserRecord = {
+            email: body.email,
+            emailVerified: body.emailVerified ?? false,
+            password: body.password,
+            displayName: body.displayName,
+            disabled: body.disabled ?? false,
+        }
+
+        if (body?.phoneNumber) {
+            user.phoneNumber = body.phoneNumber
+        }
+
+        const userRecord = await getAuth().createUser(user);
+        const userDoc = {
+            uid: userRecord.uid,
+            email: userRecord.email,
+            displayName: userRecord.displayName ?? null,
+            role: body.role,
+            photoURL: "",
+            emailVerified: userRecord.emailVerified,
+            phoneNumber: userRecord.phoneNumber ?? null,
+            disabled: userRecord.disabled,
+            owns: [],
+            subscribedTo: body.subscribedTo,
+            signInDate: new Date(),
+            createdAt: new Date(),
+        };
+        this.collection.doc(userRecord.uid).create(userDoc);
+
+        return userDoc.uid
+    }
+
+    async generateApiKey(uid: string) {
+        const userSnapshot = (await this.collection.doc(uid).get())?.data()
+
+        let apiKey: string = ""
+        if (!userSnapshot?.apiKeyHash) {
+            apiKey = generateApiKeyV1()
+            const apiKeyHash = crypto.createHash("sha256").update(apiKey).digest("hex")
+            const response = await this.collection.doc(uid).update({
+                apiKeyHash,
+                createdAt: new Date()
+            })
+            return apiKey
+        }
+        return null
+    }
+
+
+}

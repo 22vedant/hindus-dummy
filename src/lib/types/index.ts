@@ -15,6 +15,9 @@ export interface myUserRecord {
     photoUrl?: string
     disabled?: boolean
     phoneNumber?: string
+    subscribedTo?: string[]
+    role?: string
+
 }
 
 export interface User {

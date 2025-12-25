@@ -9,11 +9,6 @@ export const generateApiKeyV1 = () => {
     return crypto.randomBytes(length).toString("base64")
 }
 
-export const generateApiKeyV2 = () => {
-    const length = 24
-    return crypto.randomBytes(length).toString("base64")
-}
-
 export const generateAccessToken = (user: User) => {
     return jwt.sign(
         {

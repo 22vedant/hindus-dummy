@@ -1,9 +1,9 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
-import type { authMiddlewareInfoRequest } from "../../lib/types/index.ts";
+import type { authMiddlewareInfoRequest } from "../../../lib/types/index.ts";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
-import { generateAccessToken, generateRefreshToken } from "../../lib/utils.ts";
+import { generateAccessToken, generateRefreshToken } from "../../../lib/utils.ts";
 export const userRouter2 = Router()
 
 // implement this route after firebase client sdk signin. This returns access token and refresh token required for authenticate RBAC. 
@@ -28,6 +28,7 @@ userRouter2.post('/auth/login', async (req: Request, res: Response) => {
         sameSite: "strict",
         path: "/auth/refresh"
     })
+
     return res.json({
         accessToken: accessToken,
         refreshToken: refreshToken

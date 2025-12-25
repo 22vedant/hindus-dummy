@@ -5,9 +5,11 @@ import { getFirestore } from "firebase-admin/firestore";
 import { userAuthMiddleware, userCreationBodyChecker } from "@/middlewares/middleware.ts";
 import type { authMiddlewareInfoRequest, myUserRecord } from "@/lib/types/index.ts";
 import { db } from "@/lib/firebase.ts";
+import { generateApiKeyV1 } from "@/lib/utils.ts";
+import * as userController from "@/controllers/users.controller.ts"
 import dotenv from "dotenv"
-import { generateApiKeyV1, generateApiKeyV2 } from "@/lib/utils.ts";
 dotenv.config()
+
 const userRouter = Router();
 
 userRouter.get("/asd", (req: Request, res: Response) => {
@@ -18,7 +20,7 @@ userRouter.get("/asd", (req: Request, res: Response) => {
   });
 });
 
-userRouter.post("/create", userCreationBodyChecker, async (req, res) => {
+userRouter.post("/create", userCreationBodyChecker,
   // #swagger.tags = ['Users']
   // #swagger.summary = 'Create User'
   // #swagger.description = 'An API route to create users on Firebase'
@@ -63,49 +65,8 @@ userRouter.post("/create", userCreationBodyChecker, async (req, res) => {
          }           
      }
  }   
-*/
-  try {
-    const body = req.body
-
-    const user: myUserRecord = {
-      email: body.email,
-      emailVerified: body.emailVerified ?? false,
-      password: body.password,
-      displayName: body.displayName,
-      disabled: body.disabled ?? false,
-    }
-
-    if (req.body?.phoneNumber) {
-      user.phoneNumber = req.body.phoneNumber
-    }
-
-    const userRecord = await getAuth().createUser(user);
-
-    const userDoc = {
-      uid: userRecord.uid,
-      email: userRecord.email,
-      displayName: userRecord.displayName ?? null,
-      role: body.role,
-      photoURL: "",
-      emailVerified: userRecord.emailVerified,
-      phoneNumber: userRecord.phoneNumber ?? null,
-      disabled: userRecord.disabled,
-      owns: [],
-      subscribedTo: body.subscribedTo,
-      signInDate: new Date(),
-      createdAt: new Date(),
-    };
-
-    getFirestore().collection("users").doc(userRecord.uid).create(userDoc);
-    res.json({
-      message: "Created successfully",
-    });
-  } catch (error: any) {
-    return res.status(400).json({
-      message: error.message
-    })
-  }
-});
+*/ userController.createUser
+);
 
 userRouter.post('/generateId', async (req, res) => {
   // #swagger.tags = ['Users']
@@ -193,41 +154,40 @@ userRouter.delete("/delete", async (req: authMiddlewareInfoRequest, res: Respons
   });
 });
 
-userRouter.get('/api-key-gen', async (req: authMiddlewareInfoRequest, res: Response) => {
-  try {
-    const uid = req.uid
-    const apiVersion = req.query.apiVersion as string
-    // const baseApiVersion = (req.baseUrl).toString().slice(2, 3)
-    const userRef = await getFirestore().collection("users").doc(uid!)
-    const userSnapshot = await userRef.get();
-    let apiKey = ""
-    if (!userSnapshot.data()?.apiKeyHash) {
-      if (apiVersion === '2') {
-        apiKey = generateApiKeyV2()
-      } else {
-        apiKey = generateApiKeyV1()
-      }
-      const apiKeyHash = crypto.createHash("sha256").update(apiKey).digest("hex")
-      userRef.update({
-        apiKeyHash,
-        createdAt: new Date()
-      })
+userRouter.get('/api-key-gen', userController.generateApiKey
+  //  async (req: authMiddlewareInfoRequest, res: Response) => {
+  // try {
+  //   const uid = req.uid
+  //   const apiVersion = req.query.apiVersion as string
+  //   // const baseApiVersion = (req.baseUrl).toString().slice(2, 3)
+  //   const userRef = await getFirestore().collection("users").doc(uid!)
+  //   const userSnapshot = await userRef.get();
+  //   let apiKey = ""
+  //   if (!userSnapshot.data()?.apiKeyHash) {
+  //     apiKey = generateApiKeyV1()
 
-      return res.status(200).json({
-        apiKey
-      })
-    }
+  //     const apiKeyHash = crypto.createHash("sha256").update(apiKey).digest("hex")
+  //     userRef.update({
+  //       apiKeyHash,
+  //       createdAt: new Date()
+  //     })
 
-    return res.status(409).json({
-      message: "You have already generated an API key. Please contact support to rotate/regenerate the key.",
-    })
+  //     return res.status(200).json({
+  //       apiKey
+  //     })
+  //   }
 
-  } catch (error: any) {
-    return res.status(500).json({
-      message: error.message
-    })
-  }
+  //   return res.status(409).json({
+  //     message: "You have already generated an API key. Please contact support to rotate/regenerate the key.",
+  //   })
 
-})
+  // } catch (error: any) {
+  //   return res.status(500).json({
+  //     message: error.message
+  //   })
+  // }
+
+  // }
+)
 
 export default userRouter;
