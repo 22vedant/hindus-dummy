@@ -5,7 +5,7 @@ import multer, { memoryStorage } from "multer";
 import { getStorage } from "firebase-admin/storage";
 import dotenv from "dotenv";
 import { FieldValue, getFirestore, type DocumentData } from "firebase-admin/firestore";
-import { apiKeyChecker, isAdmin, userAuthMiddleware } from "../../../middleware.js";
+import { apiKeyChecker, isAdmin, userAuthMiddleware } from "@/middlewares/middleware.ts";
 import type { authMiddlewareInfoRequest } from "../../../lib/types/index.js";
 import { db } from "../../../lib/firebase.js";
 dotenv.config();

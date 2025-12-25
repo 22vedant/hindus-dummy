@@ -7,3 +7,4 @@ firebase-debug.log
 firestore-debug.log
 pubsub-debug.log
 empdata-*.json
+coverage

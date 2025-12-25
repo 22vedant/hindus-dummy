@@ -2,11 +2,11 @@ import crypto from "crypto"
 import { Router, type Request, type Response } from "express";
 import { getAuth, UserRecord, type DecodedIdToken } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
-import { userAuthMiddleware, userCreationBodyChecker } from "../../../middleware.js";
-import type { authMiddlewareInfoRequest, myUserRecord } from "../../../lib/types/index.js";
-import { db } from "../../../lib/firebase.js";
+import { userAuthMiddleware, userCreationBodyChecker } from "@/middlewares/middleware.ts";
+import type { authMiddlewareInfoRequest, myUserRecord } from "@/lib/types/index.ts";
+import { db } from "@/lib/firebase.ts";
 import dotenv from "dotenv"
-import { generateApiKeyV1, generateApiKeyV2 } from "../../../lib/utils.ts";
+import { generateApiKeyV1, generateApiKeyV2 } from "@/lib/utils.ts";
 dotenv.config()
 const userRouter = Router();
 

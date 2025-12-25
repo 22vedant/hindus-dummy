@@ -9,7 +9,7 @@
     "build": "npx tsc -p tsconfig.build.json && node scripts/copy-assets.js",
     "dev": "npx tsc && nodemon dist/index.js",
     "inspect": "node --inspect src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "swagger": "node src/swagger.ts"
   },
   "keywords": [],
@@ -26,16 +26,21 @@
     "express": "^5.2.1",
     "firebase": "^12.7.0",
     "firebase-admin": "^13.6.0",
+    "jest": "^30.2.0",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.0.2",
+    "supertest": "^7.1.4",
     "swagger-jsdoc": "^6.2.8",
-    "ts-node": "^10.9.2",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/multer": "^2.0.0",
+    "@types/supertest": "^6.0.3",
     "@types/swagger-jsdoc": "^6.0.4",
     "nodemon": "^3.1.11",
-    "swagger-autogen": "^2.23.7"
+    "swagger-autogen": "^2.23.7",
+    "tsx": "^4.21.0"
   }
 }

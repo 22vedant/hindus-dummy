@@ -14,16 +14,24 @@
     // "exactOptionalPropertyTypes": true,
     // "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "types": [],
+    "types": [
+      "jest"
+    ],
     "skipLibCheck": true,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
   },
   "include": [
-    "src"
+    "src",
+    "tests"
   ],
   "exclude": [
     "functions"
   ],
   "ts-node": {
     "logError": true
-  }
+  },
 }

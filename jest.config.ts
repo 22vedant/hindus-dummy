@@ -1,10 +1,50 @@
-import type { Config } from 'jest'
-import { createDefaultEsmPreset } from 'ts-jest'
+/**
+ * For a detailed explanation regarding each configuration property, visit:
+ * https://jestjs.io/docs/configuration
+ */
 
-const presetConfig = createDefaultEsmPreset({
-  //...options
-})
+import type { Config } from 'jest';
 
-export default {
-  ...presetConfig,
-} satisfies Config
+const config: Config = {
+  clearMocks: true,
+  collectCoverage: true,
+  coverageDirectory: "coverage",
+
+  preset: 'ts-jest/presets/default-esm',
+
+  extensionsToTreatAsEsm: [".ts"],
+
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+  },
+
+  roots: [
+    "<rootDir>/tests"
+  ],
+
+  testEnvironment: "node",
+
+  testMatch: ['**/tests/*.test.ts'],
+
+  testPathIgnorePatterns: [
+    "\\\\node_modules\\\\"
+  ],
+
+  transform: {
+    '^.+\\.tsx?': [
+      'ts-jest',
+      {
+        useESM: true,
+        tsconfig: {
+          verbatimModuleSyntax: false,
+        },
+      },
+    ],
+  },
+
+  transformIgnorePatterns: [
+    'node_modules/(?!(supertest)/)',
+  ],
+};
+
+export default config;
