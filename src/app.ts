@@ -15,7 +15,7 @@ app.use(express.json());
 
 app.use(
   "/swagger",
-  express.static(path.join(__dirname))
+  express.static(path.join(__dirname, "lib"))
 );
 app.use('/reference', apiReference({
   url: "/swagger/swagger-output.json",

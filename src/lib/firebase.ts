@@ -3,7 +3,9 @@ import { initializeApp, cert, applicationDefault } from "firebase-admin/app";
 import type { ServiceAccount } from "firebase-admin";
 import serviceAccountJSON from "./empdata-bf69b-374286502f03.json" with { type: "json" };
 import { getFirestore } from "firebase-admin/firestore";
-const serviceAccount = serviceAccountJSON as ServiceAccount;;
+const serviceAccount = serviceAccountJSON as ServiceAccount;
+
+// const firebaseConfig = {}
 
 export const firebaseApp = initializeApp({
   credential: cert(serviceAccount),

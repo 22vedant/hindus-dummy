@@ -1,16 +1,17 @@
 import { Router, type Request, type Response } from "express";
-import { userAuthMiddleware, userCreationBodyChecker } from "@/middlewares/middleware.ts";
+import { userAuthMiddleware } from "@/middlewares/userAuth.ts";
+import { userCreationBodyChecker } from "@/middlewares/userBodyChecker.ts";
 import type { authMiddlewareInfoRequest, myUserRecord } from "@/lib/types/index.ts";
 import * as userController from "@/controllers/users.controller.ts"
 
 const userRouter = Router();
 
 // #swagger.tags = ['Users']
-userRouter.get("/heatlh", (_req: Request, res: Response) => {
-  res.json({
-    message: "inside user route",
+userRouter.get("/health", (_req: Request, res: Response) => {
+    return res.status(200).json({
+        message: "inside user route",
 
-  });
+    });
 });
 
 /*
@@ -107,7 +108,7 @@ userRouter.post("/create", userCreationBodyChecker, userController.createUser);
 */
 userRouter.post('/generateId', userController.generateToken)
 
-userRouter.use(userAuthMiddleware)
+// userRouter.use(userAuthMiddleware)
 
 /* #swagger.tags = ['Users']
    #swagger.security = [{
@@ -115,6 +116,6 @@ userRouter.use(userAuthMiddleware)
    }] */
 userRouter.delete("/delete", userController.deleteUser);
 
-userRouter.get('/api-key-gen', userController.generateApiKey)
+userRouter.get('/api-key-gen', userAuthMiddleware, userController.generateApiKey)
 
 export default userRouter;

@@ -1,6 +1,9 @@
 import { Router, type Response } from "express";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
-import { isAdmin, quizCreateBodyChecker, quizQuestionsCreateChecker, userAuthMiddleware } from "@/middlewares/middleware.ts";
+import { isAdmin } from "@/middlewares/isAdmin.ts";
+import { quizCreateBodyChecker } from "@/middlewares/quizBodyChecker.ts";
+import { quizQuestionsCreateChecker } from "@/middlewares/quizQuestionsChecker.ts";
+import { userAuthMiddleware } from "@/middlewares/userAuth.ts";
 import type { authMiddlewareInfoRequest } from "@/lib/types/index.ts";
 import { db } from "@/lib/firebase.ts";
 import * as quizController from "@/controllers/quiz.controller.ts"

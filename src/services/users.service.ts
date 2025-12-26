@@ -45,16 +45,16 @@ export class UserModel {
         const userSnapshot = (await this.collection.doc(uid).get())?.data()
 
         let apiKey: string = ""
-        if (!userSnapshot?.apiKeyHash) {
-            apiKey = generateApiKeyV1()
-            const apiKeyHash = crypto.createHash("sha256").update(apiKey).digest("hex")
-            const response = await this.collection.doc(uid).update({
-                apiKeyHash,
-                createdAt: new Date()
-            })
-            return apiKey
-        }
-        return null
+        // if (!userSnapshot?.apiKeyHash) {
+        apiKey = generateApiKeyV1()
+        const apiKeyHash = crypto.createHash("sha256").update(apiKey).digest("hex")
+        const response = await this.collection.doc(uid).update({
+            apiKeyHash,
+            createdAt: new Date()
+        })
+        return apiKey
+        // }
+        // return null
     }
 
     async deleteUser(uid: string) {

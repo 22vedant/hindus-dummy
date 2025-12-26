@@ -7,24 +7,25 @@ import type { Config } from 'jest';
 
 const config: Config = {
   clearMocks: true,
-  collectCoverage: true,
-  coverageDirectory: "coverage",
+  // collectCoverage: true,
+  // coverageDirectory: "coverage",
 
   preset: 'ts-jest/presets/default-esm',
 
   extensionsToTreatAsEsm: [".ts"],
 
   moduleNameMapper: {
-    "^(\\.{1,2}/.*)\\.js$": "$1",
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
 
-  roots: [
-    "<rootDir>/tests"
-  ],
+  // roots: [
+  //   "<rootDir>/tests"
+  // ],
 
   testEnvironment: "node",
 
-  testMatch: ['**/tests/*.test.ts'],
+  testMatch: ['**/tests/*.test.ts', '**/tests/**/*.test.ts'],
 
   testPathIgnorePatterns: [
     "\\\\node_modules\\\\"

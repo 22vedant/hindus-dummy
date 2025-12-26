@@ -32,7 +32,8 @@
     "supertest": "^7.1.4",
     "swagger-jsdoc": "^6.2.8",
     "ts-jest": "^29.4.6",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

@@ -1,4 +1,4 @@
-import { Router, type Request, type Response } from "express";
+import { Router } from "express";
 import contentRouter from "./routes/content/content.route.ts";
 import quizRouter from "./routes/quiz/quiz.route.ts";
 import userRouter from "./routes/users/users.route.ts";

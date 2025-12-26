@@ -10,7 +10,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
         const uid = await model.createUser(body)
         if (!uid) return res.status(404).json({ message: 'Not found' });
 
-        return res.status(200).json({
+        return res.status(201).json({
             message: "User created successfully",
             uid: uid
         })
@@ -22,7 +22,9 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 export const generateApiKey = async (req: authMiddlewareInfoRequest, res: Response, next: NextFunction) => {
     try {
         const uid = req.uid as string
+        // const uid = "KYSsDN5NOa4noPie3YmkFv17ytXm";
         const response = await model.generateApiKey(uid)
+        console.log(uid);
 
         if (!uid) return res.status(404).json({
             message: "User not found"

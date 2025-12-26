@@ -5,3 +5,4 @@ pubsub-debug.log
 .env
 .git
 .gitignore
+empdata*.json
