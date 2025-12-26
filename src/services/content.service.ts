@@ -1,6 +1,6 @@
 import { db } from "@/lib/firebase.ts"
 
-export class ContentModal {
+export class ContentService {
     private collection = db.collection("content")
 
     async getContentSnapshot(uid: string) {

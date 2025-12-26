@@ -1,9 +1,11 @@
 import { db } from "@/lib/firebase.ts"
 import { getAuth } from "firebase-admin/auth";
 import crypto from "crypto"
-import type { myUserRecord } from "@/lib/types/index.ts"
+import type { myUserRecord, tokenGen } from "@/lib/types/index.ts"
 import { generateApiKeyV1 } from "@/lib/utils.ts";
-export class UsersModal {
+import axios from "axios";
+
+export class UserModel {
     private collection = db.collection("users")
 
     async createUser(body: myUserRecord) {
@@ -55,5 +57,19 @@ export class UsersModal {
         return null
     }
 
+    async deleteUser(uid: string) {
+        await getAuth().deleteUser(uid)
+        await this.collection.doc(uid).delete()
+    }
 
+    async generateToken(body: tokenGen) {
+        const { email, password, returnSecureToken } = body
+        const response = await axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.MY_API_KEY}`, {
+            email,
+            password,
+            returnSecureToken
+        })
+
+        return response;
+    }
 }

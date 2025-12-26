@@ -3,46 +3,47 @@ import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { isAdmin, quizCreateBodyChecker, quizQuestionsCreateChecker, userAuthMiddleware } from "@/middlewares/middleware.ts";
 import type { authMiddlewareInfoRequest } from "@/lib/types/index.ts";
 import { db } from "@/lib/firebase.ts";
-
+import * as quizController from "@/controllers/quiz.controller.ts"
 const quizRouter = Router()
 
-quizRouter.get('/', (req, res) => {
+
+quizRouter.get('/heatlh', (req, res) => {
     // #swagger.tags = ['Quiz']
     return res.json({
         message: "inside quiz Router"
     })
 })
 
-quizRouter.post('/create', userAuthMiddleware, isAdmin, quizCreateBodyChecker, async (req: authMiddlewareInfoRequest, res) => {
-    // #swagger.tags = ['Quiz']
-    /* #swagger.security = [{
-       "bearerAuth": []
-  }] 
-   #swagger.summary = 'Create Quiz'
-   #swagger.description = 'An API route to create a new quiz'
-   #swagger.requestBody = {
-          required: true,
-          content: {
-              "application/json": {
-                  schema: {
-                      $ref: "#/components/schemas/CreateQuizBody"
-                  },
-                  
+/* #swagger.tags = ['Quiz']
+    #swagger.security = [{
+           "bearerAuth": []
+    }] 
+    #swagger.summary = 'Create Quiz'
+    #swagger.description = 'An API route to create a new quiz'
+    #swagger.requestBody = {
+              required: true,
+              content: {
+                  "application/json": {
+                      schema: {
+                          $ref: "#/components/schemas/CreateQuizBody"
+                      },
+                      
+                  }
               }
           }
-      }
-    #swagger.responses[200] = {
-            description: "Some description...",
-            content: {
-                "application/json": {
-                    schema:{
-                        $ref: "#/components/schemas/User"
-                    }
-                }           
+        #swagger.responses[200] = {
+                description: "Some description...",
+                content: {
+                    "application/json": {
+                        schema:{
+                            $ref: "#/components/schemas/User"
+                        }
+                    }           
+                }
             }
-        }
-            
-  */
+                
+      */
+quizRouter.post('/create', userAuthMiddleware, isAdmin, quizCreateBodyChecker, async (req: authMiddlewareInfoRequest, res) => {
     try {
 
         const uid = req.uid;
@@ -104,104 +105,78 @@ quizRouter.post('/create', userAuthMiddleware, isAdmin, quizCreateBodyChecker, a
     }
 });
 
-quizRouter.post("/questions/create", userAuthMiddleware, isAdmin, quizQuestionsCreateChecker, async (req: authMiddlewareInfoRequest, res: Response) => {
-    // #swagger.tags = ['Quiz']
-    /* #swagger.security = [{
-   "bearerAuth": []
-}] 
+/* #swagger.tags = ['Quiz']
+    swagger.security = [{
+    "bearerAuth": []
+    }] 
+    #swagger.summary = 'Create Quiz Questions'
+    #swagger.description = 'An API route to create questions required for quiz. Only one questions is allowed in each query'
+    #swagger.requestBody = {
+          required: true,
+          content: {
+              "application/json": {
+                  schema: {
+                      $ref: "#/components/schemas/CreateQuizQuestions"
+                  },
+                  
+              }
+          }
+      }
+    #swagger.responses[200] = {
+            description: "Some description...",
+            content: {
+                "application/json": {
+                    schema:{
+                        $ref: "#/components/schemas/User"
+                    }
+                }           
+            }
+        }
+            
+    */
+
+quizRouter.post("/questions/create", userAuthMiddleware, isAdmin, quizQuestionsCreateChecker, quizController.createQuestion)
+
+/*
+#swagger.tags = ['Quiz']
+#swagger.security = [{
+    "bearerAuth": []
+}]
 #swagger.summary = 'Create Quiz Questions'
 #swagger.description = 'An API route to create questions required for quiz. Only one questions is allowed in each query'
 #swagger.requestBody = {
-      required: true,
-      content: {
-          "application/json": {
-              schema: {
-                  $ref: "#/components/schemas/CreateQuizQuestions"
-              },
-              
-          }
-      }
-  }
+    required: true,
+    content: {
+        "application/json": {
+            schema: {
+                $ref: "#/components/schemas/SubmitQuizBody"
+            },
+        }
+    }
+}
 #swagger.responses[200] = {
-        description: "Some description...",
-        content: {
-            "application/json": {
-                schema:{
-                    $ref: "#/components/schemas/User"
-                }
-            }           
+    description: "Some description...",
+    content: {
+        "application/json": {
+            schema: {
+                $ref: "#/components/schemas/User"
+            }
         }
     }
-        
-*/
-    try {
-        const uid = req.uid as string;
-        const body = req.body;
-
-        const questionsDoc = {
-            title: body.title,
-            description: body.description,
-            options: body.options,
-            correctOption: body.correctOption,
-            explanation: body.explanation,
-            questionType: body.questionType,
-            createdBy: uid,
-            updatedBy: uid,
-            updatedAt: new Date(),
-            createdAt: new Date()
-        }
-
-        await db.collection("questions").add(questionsDoc)
-        return res.status(200).json({
-            message: "Questions added successfully"
-        })
-    } catch (error: any) {
-        return res.status(500).json({
-            message: error.message
-        })
-    }
-})
-
+}
+#swagger.parameters['quizId'] = {
+    in: 'query',
+    description: 'The quizId of quiz being submitted',
+    required: true,
+    example: '123'
+}
+    */
 quizRouter.post(
     "/submit",
     userAuthMiddleware,
     async (req: authMiddlewareInfoRequest, res) => {
         try {
-            // #swagger.tags = ['Quiz']
-            /* #swagger.security = [{
-            "bearerAuth": []
-            }] 
-            #swagger.summary = 'Create Quiz Questions'
-            #swagger.description = 'An API route to create questions required for quiz. Only one questions is allowed in each query'
-            #swagger.requestBody = {
-              required: true,
-              content: {
-                  "application/json": {
-                      schema: {
-                          $ref: "#/components/schemas/SubmitQuizBody"
-                      },
-                      
-                  }
-              }
-            }
-            #swagger.responses[200] = {
-                description: "Some description...",
-                content: {
-                    "application/json": {
-                        schema:{
-                            $ref: "#/components/schemas/User"
-                        }
-                    }           
-                }
-            }
-            #swagger.parameters['quizId'] = {
-            in: 'query',
-            description: 'The quizId of quiz being submitted',
-            required: true,
-            example: '123'
-            }
-                
-            */
+
             const quizId = req.query.quizId as string;
             const uid = req.uid
 

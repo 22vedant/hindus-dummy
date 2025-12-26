@@ -25,3 +25,18 @@ export interface User {
     role?: string
     email?: string
 }
+
+export interface tokenGen {
+    email: string;
+    password: string
+    returnSecureToken: boolean
+}
+
+export interface questionBody {
+    title: string,
+    description: string,
+    options: string,
+    correctOption: string,
+    explanation: string,
+    questionType: string,
+}

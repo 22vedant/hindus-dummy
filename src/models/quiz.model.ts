@@ -1,5 +1,2 @@
-import { db } from "@/lib/firebase.ts"
+import { db } from "@/lib/firebase.ts";
 
-export class QuizModal {
-
-}
