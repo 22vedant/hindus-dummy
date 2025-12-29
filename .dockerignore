@@ -1,0 +1,8 @@
+node_modules
+npm-debug.log
+firestore-debug.log
+pubsub-debug.log
+.env
+.git
+.gitignore
+empdata*.json

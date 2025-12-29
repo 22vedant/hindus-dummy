@@ -1,0 +1,17 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "rootDir": ".",
+        "outDir": "dist",
+        "declaration": true,
+        "declarationMap": true,
+        "emitDeclarationOnly": false,
+        "sourceMap": true,
+        "noEmit": false,
+    },
+    "include": [
+        "src",
+        "email-list.ts",
+        "firebase-messaging-sw.ts",
+    ]
+}

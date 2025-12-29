@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+</head>
+
+<body>
+    <h3>FCM Token Generator</h3>
+    <button id="enable">Enable Notifications</button>
+    <div id="notification"></div>
+    <br />
+    <br />
+    <form id="mailing-form">
+        <label for="email">enter email</label>
+        <input id="email" type="email" required />
+        <br />
+        <!-- <label for="password">enter password</label>
+        <input id="password" type="password" required /> -->
+        <br />
+        <br />
+        <button id="join-mailing-list" type="submit">Join the Mailing List</button>
+    </form>
+    <br />
+    <br />
+    <form id="login-form" style="border: 1px solid black; display:flex;">
+        <label for="login">enter email</label>
+        <input id="login" type="email" required />
+        <br />
+        <button id="login-btn" type="submit">Login</button>
+    </form>
+
+    <script type="module">
+        import { initializeApp, } from 'https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js'
+        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-messaging.js";
+        import { getAuth, connectAuthEmulator, signInWithEmailLink, isSignInWithEmailLink, sendSignInLinkToEmail } from 'https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js';
+        import { getFirestore, connectFirestoreEmulator, doc, setDoc, arrayUnion, addDoc, collection } from 'https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js'
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCO5AAPqbfHEZoIs5SvITAWczVUW1sOZu4",
+            authDomain: "empdata-bf69b.firebaseapp.com",
+            databaseURL: "https://empdata-bf69b-default-rtdb.firebaseio.com",
+            projectId: "empdata-bf69b",
+            storageBucket: "empdata-bf69b.appspot.com",
+            messagingSenderId: "182702284982",
+            appId: "1:182702284982:web:d6a054282774a3a3d00617",
+            measurementId: "G-8JRXWP1C5K"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const messaging = getMessaging(app);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        document.getElementById("enable").addEventListener("click", async () => {
+            const registration = await navigator.serviceWorker.register(
+                "/firebase-messaging-sw.js"
+            );
+
+            const permission = await Notification.requestPermission();
+            if (permission !== "granted") {
+                console.error("Permission denied");
+                return;
+            }
+
+            const token = await getToken(messaging, {
+                vapidKey: "BEvGL05N5_X9fR12yvw0jWueRw2urddoJmVrw2l02JfMRx9qqR3jt9vl7vtNoGWbI6e1wWNTiiAl_6pniMoEI9Q",
+                serviceWorkerRegistration: registration
+            });
+            const notificationdiv = document.getElementById("notification")
+            notificationdiv.innerHTML = token
+
+            await setDoc(
+                doc(db, "vapid_tokens", "A"),
+                {
+                    tokens: arrayUnion(token),
+                },
+                { merge: true }
+            );
+            console.log("🔥 FCM TOKEN:", token);
+
+        });
+
+        const form = document.getElementById("mailing-form")
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault()
+            const email = document.getElementById("email").value
+            // const password = document.getElementById("password").value
+
+            // await addDoc(collection(db, "mailingLists"), {
+            //     email,
+            //     createdAt: new Date(),
+            // });
+
+            await setDoc(
+                doc(db, "mailingLists", "A"),
+                {
+                    emails: arrayUnion(email),
+                },
+                { merge: true }
+            );
+
+            console.log("added to mailing list");
+
+
+        })
+
+
+        const login = document.getElementById("login-form")
+        login.addEventListener("submit", async (event) => {
+            event.preventDefault()
+            const email = document.getElementById("login").value
+
+            const actionCodeSettings = {
+                url: 'http://localhost:5500',
+                handleCodeInApp: true
+            }
+            await sendSignInLinkToEmail(auth, email, actionCodeSettings)
+        })
+
+        if (location.hostname === "localhost") {
+            connectFirestoreEmulator(db, "localhost", 8080);
+            connectAuthEmulator(auth, "http://localhost:9099");
+        }
+    </script>
+    <script src="firebase-messaging-sw.js" defer type="module"></script>
+    <script type="module" src="email-list.js"></script>
+</body>
+
+</html>

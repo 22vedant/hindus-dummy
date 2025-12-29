@@ -1,17 +1,18 @@
 import { getStorage } from "firebase-admin/storage";
-import { initializeApp, cert } from "firebase-admin/app";
-import { Bucket } from "@google-cloud/storage";
+import { initializeApp, cert, applicationDefault } from "firebase-admin/app";
 import type { ServiceAccount } from "firebase-admin";
-import dotenv from "dotenv";
-import serviceAccountJSON from "./service-account-hindus.json" with { type: "json" };
+import serviceAccountJSON from "./empdata-bf69b-374286502f03.json" with { type: "json" };
+import { getFirestore } from "firebase-admin/firestore";
 const serviceAccount = serviceAccountJSON as ServiceAccount;
 
-dotenv.config();
+// const firebaseConfig = {}
 
 export const firebaseApp = initializeApp({
   credential: cert(serviceAccount),
-  projectId: "first-test-12cd8",
-  storageBucket: "first-test-12cd8.firebasestorage.app",
-});
+  projectId: "empdata-bf69b",
+  storageBucket: "empdata-bf69b.appspot.com",
+})
+
+export const db = getFirestore(firebaseApp)
 
 export const bucket: any = getStorage();

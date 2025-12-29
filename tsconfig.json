@@ -1,41 +1,38 @@
 {
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    // File Layout
-    "rootDir": "src",
-    "outDir": "dist",
-    "allowJs": true,
     "module": "nodenext",
     "target": "esnext",
-    "types": [],
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    "allowImportingTsExtensions": true,
-    "emitDeclarationOnly": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    "moduleResolution": "nodenext",
     "strict": true,
-    "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
     "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "allowJs": true,
+    "allowImportingTsExtensions": true,
+    // "noUncheckedIndexedAccess": true,
+    // "exactOptionalPropertyTypes": true,
+    // "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
+    "types": [
+      "jest"
+    ],
     "skipLibCheck": true,
-    // "typeRoots": [
-    //   "./src/lib/types",
-    //   "src/lib/types",
-    //   "./node_modules/@types"
-    // ]
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
   },
   "include": [
     "src",
-    "src/middleware.ts"
+    "tests",
+    "scripts"
   ],
   "exclude": [
     "functions"
   ],
   "ts-node": {
     "logError": true
-  }
+  },
 }
