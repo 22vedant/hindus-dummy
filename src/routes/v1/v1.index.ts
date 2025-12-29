@@ -5,6 +5,6 @@ import userRouter from "./routes/users/users.route.ts";
 
 export const v1Router = Router();
 
-v1Router.use('/content', contentRouter)
 v1Router.use('/users', userRouter)
+v1Router.use('/content', contentRouter)
 v1Router.use('/quiz', quizRouter)

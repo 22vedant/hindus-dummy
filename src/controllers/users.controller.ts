@@ -1,13 +1,14 @@
 import type { Request, Response, NextFunction } from 'express';
-import { UserModel } from '@/services/users.service.ts';
+import { UserService } from '@/services/users.service.ts';
 import type { authMiddlewareInfoRequest } from '@/lib/types/index.ts';
+import { UserModel } from '@/models/users.model.ts';
+const userService = new UserService()
 
-const model = new UserModel()
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const body = req.body
-        const uid = await model.createUser(body)
+        const userModel = new UserModel(req.body)
+        const uid = await userService.createUser(userModel)
         if (!uid) return res.status(404).json({ message: 'Not found' });
 
         return res.status(201).json({
@@ -23,8 +24,7 @@ export const generateApiKey = async (req: authMiddlewareInfoRequest, res: Respon
     try {
         const uid = req.uid as string
         // const uid = "KYSsDN5NOa4noPie3YmkFv17ytXm";
-        const response = await model.generateApiKey(uid)
-        console.log(uid);
+        const response = await userService.generateApiKey(uid)
 
         if (!uid) return res.status(404).json({
             message: "User not found"
@@ -47,7 +47,7 @@ export const generateApiKey = async (req: authMiddlewareInfoRequest, res: Respon
 export const deleteUser = async (req: authMiddlewareInfoRequest, res: Response, next: NextFunction) => {
     try {
         const uid = req.uid as string
-        const response = await model.deleteUser(uid)
+        const response = await userService.deleteUser(uid)
 
         return res.status(200).json({
             message: "User deleted successfully"
@@ -60,7 +60,7 @@ export const deleteUser = async (req: authMiddlewareInfoRequest, res: Response, 
 export const generateToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const body = req.body;
-        const response = await model.generateToken(body)
+        const response = await userService.generateToken(body)
 
         return res.status(200).json({
             message: "Token generated successfully",

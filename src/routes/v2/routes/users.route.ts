@@ -36,36 +36,33 @@ userRouter2.post('/auth/login', async (req: Request, res: Response) => {
 
 })
 
+/**
+ * @openapi
+ * /v2/users/create:
+ *   post:
+ *     tags:
+ *       - Users
+ *     summary: Create User
+ *     description: An alternate API route to create users as well as update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateBodyRequest'
+ *           examples:
+ *             CreateUserExample:
+ *               $ref: '#/components/examples/CreateBodyExample'
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CreateBodyResponse'
+ */
+
 userRouter2.post("/create", async (req: authMiddlewareInfoRequest, res: Response) => {
-
-    /* #swagger.tags = ['Users']
-     #swagger.summary = 'Create User'
-     #swagger.description = 'An Alternate API route to create users as well as update'
-     #swagger.requestBody = {
-                required: true,
-                content: {
-                    "application/json": {
-                        schema: {
-                            $ref: "#/components/schemas/CreateBodyRequest"
-                        },
-                        example: { 
-                          $ref: "#/components/examples/CreateBodyExample"
-                      }
-                    }
-                }
-            } 
-
-       #swagger.responses[200] = {
-       description: "Success",
-       content: {
-           "application/json": {
-               schema:{
-                   $ref: "#/components/schemas/CreateBodyResponse"
-               }
-           }           
-       }
-   }   
-  */
     try {
         let user;
         try {

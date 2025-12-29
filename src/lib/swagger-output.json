@@ -10,16 +10,20 @@
       "url": "http://localhost:8080"
     },
     {
+      "url": "http://localhost:3000"
+    },
+    {
       "url": "https://h-dummy-app-express-app-182702284982.asia-south1.run.app/"
     }
   ],
   "paths": {
-    "/v1/users/": {
+    "/": {
       "get": {
         "tags": [
-          "Users"
+          "Content"
         ],
-        "description": "",
+        "summary": "Test Content",
+        "description": "An API route to test content route",
         "responses": {
           "200": {
             "description": "OK"
@@ -27,112 +31,7 @@
         }
       }
     },
-    "/v1/users/create": {
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Create User",
-        "description": "An API route to create users on Firebase",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                },
-                "example": {
-                  "success": true,
-                  "message": "Ok",
-                  "errorCode": "200"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                },
-                "example": {
-                  "success": true,
-                  "message": "Bad Request",
-                  "errorCode": "400"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateBodyRequest"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/users/generateId": {
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Fetch User Details",
-        "description": "An API route to fetch user details from Identity platform",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                },
-                "example": {
-                  "success": true,
-                  "message": "Ok",
-                  "errorCode": "200"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                },
-                "example": {
-                  "success": true,
-                  "message": "Bad Request",
-                  "errorCode": "400"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IdGenSchema"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/users/create2": {
+    "/create": {
       "post": {
         "tags": [
           "Users"
@@ -150,16 +49,27 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "409": {
             "description": "Conflict"
           },
           "500": {
             "description": "Internal Server Error"
+          },
+          "default": {
+            "description": ""
           }
         },
         "requestBody": {
           "required": true,
           "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContentBody"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateBodyRequest"
@@ -172,86 +82,7 @@
         }
       }
     },
-    "/v1/users/delete": {
-      "delete": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/content/": {
-      "get": {
-        "tags": [
-          "Content"
-        ],
-        "summary": "Test Content",
-        "description": "An API route to test content route",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/v1/content/create": {
-      "post": {
-        "tags": [
-          "Content"
-        ],
-        "summary": "Create Content",
-        "description": "An API route to create content - Uploads a file, stores it in Firebase Storage, and creates a content record in Firestore.",
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentBody"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/content/update": {
+    "/update": {
       "post": {
         "tags": [
           "Content"
@@ -281,12 +112,6 @@
           "400": {
             "description": "Bad Request"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
           "404": {
             "description": "Not Found"
           },
@@ -311,7 +136,7 @@
         }
       }
     },
-    "/v1/content/update/image": {
+    "/update/image": {
       "post": {
         "tags": [
           "Content"
@@ -364,7 +189,7 @@
         }
       }
     },
-    "/v1/content/data": {
+    "/data": {
       "get": {
         "tags": [
           "Content"
@@ -406,9 +231,6 @@
           "200": {
             "description": "OK"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -420,7 +242,7 @@
         ]
       }
     },
-    "/v1/quiz/": {
+    "/heatlh": {
       "get": {
         "tags": [
           "Quiz"
@@ -433,55 +255,7 @@
         }
       }
     },
-    "/v1/quiz/create": {
-      "post": {
-        "tags": [
-          "Quiz"
-        ],
-        "summary": "Create Quiz",
-        "description": "An API route to create a new quiz",
-        "responses": {
-          "200": {
-            "description": "Some description...",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateQuizBody"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/quiz/questions/create": {
+    "/questions/create": {
       "post": {
         "tags": [
           "Quiz"
@@ -498,25 +272,8 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -529,20 +286,13 @@
         }
       }
     },
-    "/v1/quiz/submit": {
+    "/submit": {
       "post": {
-        "tags": [
-          "Quiz"
-        ],
-        "summary": "Create Quiz Questions",
-        "description": "An API route to create questions required for quiz. Only one questions is allowed in each query",
+        "description": "",
         "parameters": [
           {
             "name": "quizId",
             "in": "query",
-            "description": "The quizId of quiz being submitted",
-            "required": true,
-            "example": "123",
             "schema": {
               "type": "string"
             }
@@ -550,20 +300,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Some description...",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
+            "description": "OK"
           },
           "400": {
             "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
           },
           "403": {
             "description": "Forbidden"
@@ -575,24 +315,23 @@
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SubmitQuizBody"
+                "type": "object",
+                "properties": {
+                  "options": {
+                    "example": "any"
+                  }
+                }
               }
             }
           }
         }
       }
     },
-    "/v1/quiz/result": {
+    "/result": {
       "get": {
         "tags": [
           "Quiz"
@@ -635,6 +374,272 @@
           "400": {
             "description": "Bad Request"
           },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/generateId": {
+      "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/delete": {
+      "delete": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api-key-gen": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users/health": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/users/create": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create User",
+        "description": "An Alternate API route to create users as well as update",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateBodyResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "default": {
+            "description": ""
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBodyRequest"
+              },
+              "example": {
+                "$ref": "#/components/examples/CreateBodyExample"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/generateId": {
+      "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users/delete": {
+      "delete": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users/api-key-gen": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/content/": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Test Content",
+        "description": "An API route to test content route",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/content/create": {
+      "post": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Create Content",
+        "description": "An API route to create content - Uploads a file, stores it in Firebase Storage, and creates a content record in Firestore.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContentBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/update": {
+      "post": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Update Content",
+        "description": "An API route to update content.",
+        "parameters": [
+          {
+            "name": "contentid",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Some description...",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateContentBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/update/image": {
+      "post": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Update Image",
+        "description": "An API route to add a new image in Firebase Storage, and change the thumbnailUrlLink in content collection.",
+        "parameters": [
+          {
+            "name": "contentId",
+            "in": "query",
+            "description": "The contentId of the content being updated",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Some description...",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Unauthorized"
           },
@@ -646,12 +651,331 @@
           {
             "bearerAuth": []
           }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateImageBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/data": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Type of content to filter",
+            "required": true,
+            "example": "educational",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hidden",
+            "in": "query",
+            "description": "Whether hidden content should be included",
+            "required": true,
+            "example": "false",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "description": "Language of the content",
+            "required": true,
+            "example": "english",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
+      }
+    },
+    "/quiz/heatlh": {
+      "get": {
+        "tags": [
+          "Quiz"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/quiz/create": {
+      "post": {
+        "tags": [
+          "Quiz"
+        ],
+        "summary": "Create Quiz",
+        "description": "An API route to create a new quiz",
+        "responses": {
+          "200": {
+            "description": "Some description...",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQuizBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/quiz/questions/create": {
+      "post": {
+        "tags": [
+          "Quiz"
+        ],
+        "summary": "Create Quiz Questions",
+        "description": "An API route to create questions required for quiz. Only one questions is allowed in each query",
+        "responses": {
+          "200": {
+            "description": "Some description...",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQuizQuestions"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/quiz/submit": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "quizId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "options": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/quiz/result": {
+      "get": {
+        "tags": [
+          "Quiz"
+        ],
+        "summary": "Get Quiz Results",
+        "description": "An API route to fetch quiz results",
+        "parameters": [
+          {
+            "name": "quizId",
+            "in": "query",
+            "description": "The quizId of the attempted quiz",
+            "required": true,
+            "example": "123",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "submissionId",
+            "in": "query",
+            "description": "The submissionId of the attempted quiz",
+            "required": true,
+            "example": "123",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Some description...",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/asd": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/users/auth/login": {
+      "post": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
   "components": {
     "schemas": {
+      "CreateBodyResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "User created successfully"
+          },
+          "uid": {
+            "type": "string",
+            "example": "4gxbGh65tjWoHnuCNNpSCH4GjKv2"
+          }
+        }
+      },
       "IdGenSchema": {
         "type": "object",
         "properties": {
@@ -976,11 +1300,20 @@
       }
     },
     "securitySchemes": {
-      "bearerAuth": {
+      "Authorization": {
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
+      },
+      "x-api-key": {
+        "type": "apiKey",
+        "name": "x-api-key",
+        "in": "header"
       }
     }
-  }
+  },
+  "apis": [
+    "../app.ts",
+    "../routes/**/*.ts"
+  ]
 }

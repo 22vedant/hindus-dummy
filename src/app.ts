@@ -15,10 +15,10 @@ app.use(express.json());
 
 app.use(
   "/swagger",
-  express.static(path.join(__dirname, "lib"))
+  express.static(path.join(__dirname, "lib/swagger/"))
 );
 app.use('/reference', apiReference({
-  url: "/swagger/swagger-output.json",
+  url: "/swagger/swagger.yaml",
   hideDarkModeToggle: true,
   theme: 'deepSpace',
   title: 'Hindus R Us Api',

@@ -5,6 +5,7 @@ import type { Request } from "express";
 export interface authMiddlewareInfoRequest extends Request {
     uid?: string;
     decoded?: DecodedIdToken;
+    validated?: any
 }
 
 export interface myUserRecord {

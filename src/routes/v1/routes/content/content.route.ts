@@ -3,182 +3,114 @@ import { getAuth } from "firebase-admin/auth";
 const contentRouter = Router({ mergeParams: true });
 import multer, { memoryStorage } from "multer";
 import { getStorage } from "firebase-admin/storage";
-import dotenv from "dotenv";
-import { FieldValue, getFirestore, type DocumentData } from "firebase-admin/firestore";
+import { type DocumentData } from "firebase-admin/firestore";
 import { isAdmin } from "@/middlewares/isAdmin.ts";
 import { userAuthMiddleware } from "@/middlewares/userAuth.ts";
 import { apiKeyChecker } from "@/middlewares/apiKeyChecker.ts";
 import type { authMiddlewareInfoRequest } from "@/lib/types/index.ts";
 import { db } from "@/lib/firebase.ts";
-dotenv.config();
+import { createContentSchema } from "@/validators/content.validator.ts";
+import { validate } from "@/middlewares/validate.ts";
+import * as contentController from "@/controllers/content.controller.ts"
 const upload = multer({ storage: memoryStorage() });
 
-contentRouter.get("/", (req, res) => {
-  // #swagger.tags = ['Content']
-  // #swagger.summary = 'Test Content'
-  // #swagger.description = 'An API route to test content route'
-
+/**
+ * @openapi
+ * /v1/content/health:
+ *   get:
+ *     tags:
+ *       - Content
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       "200":
+ *         description: "inside content route"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "inside content route"
+ */
+contentRouter.get("/health", (req, res) => {
   res.json({
     message: "inside content route",
   });
 });
 
+/**
+ * @openapi
+ * /v1/content/create:
+ *   post:
+ *     tags:
+ *       - Content
+ *     summary: Create Content
+ *     description: >
+ *       An API route to create content – uploads a file, stores it in
+ *       Firebase Storage, and creates a content record in Firestore.
+ *
+ *       **Requires both headers:**
+ *       - Authorization: Bearer JWT
+ *       - x-api-key: API key header
+ *     security:
+ *       - Authorization: []
+ *         x-api-key: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateContentBody'
+ *     responses:
+ *       200:
+ *         description: Content created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+
 contentRouter.post("/create", userAuthMiddleware, apiKeyChecker, isAdmin,
   upload.single("file"),
-  async (req: authMiddlewareInfoRequest, res: Response) => {
-    try {
-      // #swagger.tags = ['Content']
-      /* #swagger.security = [{
-           "bearerAuth": []
-      }] 
-       #swagger.summary = 'Create Content'
-       #swagger.description = 'An API route to create content - Uploads a file, stores it in Firebase Storage, and creates a content record in Firestore.'
-       #swagger.requestBody = {
-              required: true,
-              content: {
-                  "multipart/form-data": {
-                      schema: {
-                          $ref: "#/components/schemas/CreateContentBody"
-                      },
-                      
-                  }
-              }
-          } 
-      */
-
-      if (!req.file) {
-        return res.status(400).send("No file uploaded.");
-      }
-
-      const uid = req.uid;
-
-      const filename = `h-dummy-files/${Date.now()}-${req.file.originalname}`;
-      const blob = getStorage().bucket().file(filename);
-
-      const stream = blob.createWriteStream({
-        metadata: {
-          contentType: req.file.mimetype,
-        },
-      });
-
-      stream.on("error", (err) => {
-        console.error(err);
-        return res.status(500).send("Upload failed");
-      });
-
-      stream.on("finish", async () => {
-        let publicUrl;
-        // if (process.env.NODE_ENV === 'development') {
-        //   publicUrl = `http://127.0.0.1:9199/v0/b/${blob.bucket.name}/o/${encodeURIComponent(filename)}?alt=media`;
-        // } else {
-        publicUrl = `https://empdata-bf69b.appspot.com/v0/b/${blob.bucket.name}/o/${encodeURIComponent(filename)}`
-        // }
-
-        const contentRecord = {
-          title: req.body.title ?? "",
-          description: req.body.description ?? "",
-          language: req.body.language ?? "",
-          thumbnailUrlLink: publicUrl,
-          createdBy: uid,
-          updatedBy: uid,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          type: req.body.type ?? "",
-          hidden: req.body.hidden as boolean ?? false,
-        };
-
-        const contentRef = await db.collection("content").add(contentRecord);
-        await db.collection("users").doc(uid!).update({
-          owns: FieldValue.arrayUnion(contentRef.id)
-        })
-
-        const contentId = contentRef.id
-
-        return res.status(200).json({
-          message: "Uploaded & stored successfully",
-          url: publicUrl,
-          filename,
-          uid,
-          contentId
-        });
-      });
-
-      stream.end(req.file.buffer);
-    } catch (err: any) {
-      console.error(err);
-      res.status(500).send(err.message);
-    }
-  },
+  validate(createContentSchema),
+  contentController.createContent
 );
 
-// update-content route
-contentRouter.post("/update", userAuthMiddleware, isAdmin, async (req: authMiddlewareInfoRequest, res: Response) => {
-  // #swagger.tags = ['Content']
-  /* #swagger.security = [{
-       "bearerAuth": []
-  }] 
-   #swagger.summary = 'Update Content'
-   #swagger.description = 'An API route to update content.'
-   #swagger.requestBody = {
-          required: true,
-          content: {
-              "application/json": {
-                  schema: {
-                      $ref: "#/components/schemas/UpdateContentBody"
-                  },
-                  
-              }
-          }
-      }
-    #swagger.responses[200] = {
-            description: "Some description...",
-            content: {
-                "application/json": {
-                    schema:{
-                        $ref: "#/components/schemas/User"
-                    }
-                }           
-            }
-        }    
-  */
-  try {
-    const contentId = req.query.contentid as string
-    const uid = req.uid as string
-    console.log(uid);
+/**
+ * @openapi
+ * /v1/content/update:
+ *   put:
+ *     tags:
+ *       - Content
+ *     summary: Update Content
+ *     description: An API route to update content.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateContentBody'
+ *     responses:
+ *       200:
+ *         description: Some description...
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ */
 
-    const body = req.body
-    if (body === null) {
-      return res.status(400).json({
-        message: "Body cannot be empty when trying to update records"
-      })
-    }
-
-    const userSnapshot = (await db.collection("users").doc(uid)?.get())?.data()
-
-    const ownedContentIds: string[] = Object.values(userSnapshot!['owns']) ?? []
-
-    if (!ownedContentIds.includes(contentId)) {
-      return res.status(404).json({
-        message: "Content document not found"
-      })
-    } else {
-      const newBody = {
-        ...body,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        updatedBy: uid
-      }
-      const updateResponse = await db.collection("content")?.doc(contentId)?.update(newBody)
-      return res.status(200).json({
-        message: "Updated successfully"
-      })
-    }
-
-  } catch (err: unknown) {
-    console.error(err);
-    res.status(500).json(err);
-  }
-});
+contentRouter.post("/update", userAuthMiddleware, isAdmin, contentController.updateContent);
 
 //update-image route
 contentRouter.post("/update/image", upload.single("file"), async (req: Request, res: Response) => {
@@ -263,72 +195,50 @@ contentRouter.post("/update/image", upload.single("file"), async (req: Request, 
   }
 })
 
-contentRouter.get("/data", userAuthMiddleware, async (req: authMiddlewareInfoRequest, res: Response) => {
-  // #swagger.tags = ['Content']
-  /* #swagger.security = [{
-      "bearerAuth": []
-  }] */
-
-  /* #swagger.parameters['type'] = {
-      in: 'query',
-      description: 'Type of content to filter',
-      required: true,
-      example: 'educational'
-  } */
-
-  /* #swagger.parameters['hidden'] = {
-      in: 'query',
-      description: 'Whether hidden content should be included',
-      required: true,
-      example: 'false'
-  } */
-
-  /* #swagger.parameters['language'] = {
-      in: 'query',
-      description: 'Language of the content',
-      required: true,
-      example: 'english'
-  } */
-
-  try {
-    const type = req.query.type;
-    const hiddenOrNot = req.query.hidden
-    const language = req.query.language
-
-    const uid = req.uid;
-
-    const contentRef = db.collection("content")
-    const contentSnapshot = await contentRef
-      .where('type', '==', type)
-      .where('hidden', '==', hiddenOrNot)
-      .where('language', '==', language)
-      .orderBy('createdAt')
-      .get()
-
-    const contentArray: DocumentData = []
-
-    contentSnapshot.forEach(doc => {
-      contentArray.push(doc.data())
-    });
-    if (contentArray.length === 0) {
-      return res.json({
-        message: "Records Not Found",
-        status: 404,
-      })
-    }
-
-    return res.status(200).json({
-      message: "Ok",
-      status: 200,
-      data: contentArray,
-    })
-
-  } catch (error) {
-    return res.status(500).json({
-      message: error
-    })
-  }
-
-})
+/**
+ * @openapi
+ * /v1/content/data:
+ *   get:
+ *     tags:
+ *       - Content
+ *     summary: Fetch Content
+ *     description: Fetch content filtered by type, visibility, and language.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: type
+ *         in: query
+ *         description: Type of content to filter
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: educational
+ *       - name: hidden
+ *         in: query
+ *         description: Whether hidden content should be included
+ *         required: true
+ *         schema:
+ *           type: boolean
+ *         example: false
+ *       - name: language
+ *         in: query
+ *         description: Language of the content
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: english
+ *     responses:
+ *       200:
+ *         description: Content fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Content'
+ *       400:
+ *         description: Bad request
+ */
+contentRouter.get("/data", userAuthMiddleware, contentController.getData)
 
 export default contentRouter;

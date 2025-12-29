@@ -1,13 +1,53 @@
 import { db } from "@/lib/firebase.ts"
 import type { questionBody } from "@/lib/types/index.ts"
+import type { QuizModelSchema } from "@/models/quiz.model.ts"
 import { FieldValue } from "firebase-admin/firestore"
 
 export class QuizService {
     private quizCollection = db.collection("quiz")
     private questionsCollection = db.collection("questions")
     async createQuiz(uid, body) {
-        const questionsSnapshot = await db.collection("questions").get()
+        const quizSize = body.numberOfQuestions;
+        const questionSnapshot = await db.collection("questions").get()
+        const questionIdArray: string[] = [];
+        questionSnapshot.forEach((doc) => {
+            questionIdArray.push(doc.id);
+        });
 
+        // Check if enough questions exist
+        if (questionIdArray.length < quizSize) {
+            return res.status(400).json({
+                message: `Not enough questions available. Requested: ${quizSize}, Available: ${questionIdArray.length}`
+            });
+        }
+
+        // Fisher-Yates shuffle
+        for (let i = questionIdArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [questionIdArray[i], questionIdArray[j]] = [questionIdArray[j]!, questionIdArray[i]!];
+        }
+
+        const refinedQuestionIdArray = questionIdArray.slice(0, quizSize);
+
+        const quizDoc: Partial<QuizModelSchema> = {
+            contentId: body.contentId,
+            title: body.title,
+            description: body.description,
+            language: body.language,
+            passingScore: body.passingScore,
+            maxAttempts: body.maxAttempts,
+            createdAt: new Date(),
+            createdBy: uid,
+            updatedAt: new Date(),
+            updatedBy: uid,
+            quizType: body.quizType,
+            numberOfQuestions: body.numberOfQuestions,
+            questions: refinedQuestionIdArray,
+            attempts: 0
+        };
+
+        const quizSnapshot = await db.collection("quiz").add(quizDoc);
+        return quizSnapshot.id
     }
 
     async createQuestion(uid: string, body: questionBody) {
@@ -135,5 +175,18 @@ export class QuizService {
             submissionId,
             options: body.options
         }
+    }
+
+    async getResult(quizId: string, uid: string, submissionId: string) {
+        const quizSubmissionSnapshot = await db.collection("quizSubmission").doc(submissionId).get()
+        const quizSubmissionData = quizSubmissionSnapshot.data()
+
+        const responseData = {
+            score: quizSubmissionData?.score,
+            status: quizSubmissionData?.status,
+            result: quizSubmissionData?.result
+        }
+
+        return responseData
     }
 }

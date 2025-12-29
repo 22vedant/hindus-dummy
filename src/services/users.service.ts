@@ -4,11 +4,12 @@ import crypto from "crypto"
 import type { myUserRecord, tokenGen } from "@/lib/types/index.ts"
 import { generateApiKeyV1 } from "@/lib/utils.ts";
 import axios from "axios";
+import type { UserModel, UserModelSchema } from "@/models/users.model.ts";
 
-export class UserModel {
+export class UserService {
     private collection = db.collection("users")
 
-    async createUser(body: myUserRecord) {
+    async createUser(body: UserModel) {
         const user: myUserRecord = {
             email: body.email,
             emailVerified: body.emailVerified ?? false,
@@ -22,14 +23,14 @@ export class UserModel {
         }
 
         const userRecord = await getAuth().createUser(user);
-        const userDoc = {
+        const userDoc: Partial<UserModelSchema> = {
             uid: userRecord.uid,
             email: userRecord.email,
-            displayName: userRecord.displayName ?? null,
+            displayName: userRecord.displayName ?? "",
             role: body.role,
-            photoURL: "",
+            photoUrl: "",
             emailVerified: userRecord.emailVerified,
-            phoneNumber: userRecord.phoneNumber ?? null,
+            phoneNumber: userRecord.phoneNumber ?? "",
             disabled: userRecord.disabled,
             owns: [],
             subscribedTo: body.subscribedTo,
@@ -38,7 +39,7 @@ export class UserModel {
         };
         this.collection.doc(userRecord.uid).create(userDoc);
 
-        return userDoc.uid
+        return userRecord.uid
     }
 
     async generateApiKey(uid: string) {
