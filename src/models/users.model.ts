@@ -1,35 +1,4 @@
-import { db } from "@/lib/firebase.ts";
-// types here
-
-// export class UserModel {
-//     private collection = db.collection("users")
-
-//     async create(postData) {
-//         const userRef = this.collection.doc();
-//         const user = {
-//             id: userRef.id,
-//             ...postData,
-//         };
-
-//         await userRef.set(user);
-//         return user;
-//     }
-
-//     async update() { }
-//     async delete() { }
-
-//     // batch delete users.
-//     async findUserByEmail(email: string) {
-//         const userSnapshot = await this.collection.where("email", "==", email).limit(1).get()
-//         if (userSnapshot.empty) {
-//             return null;
-//         }
-
-//         const doc = userSnapshot.docs[0]
-//         return { id: doc.id, ...doc.data() }
-//     }
-// }
-
+import { db } from "@/lib/firebase.ts"
 export interface UserModelSchema {
     uid: string
     email: string;
@@ -59,9 +28,14 @@ export class UserModel {
     subscribedTo: string[];
     role: string;
     owns: string[];
+    signInDate: Date;
+    createdAt: Date;
+    uid: string
+
 
     constructor(data: Partial<UserModelSchema>) {
         this.displayName = data.displayName ?? "";
+        this.uid = data.uid ?? ""
         this.email = data.email ?? "";
         this.password = data.password ?? ""
         this.disabled = data.disabled ?? false
@@ -71,6 +45,8 @@ export class UserModel {
         this.emailVerified = data.emailVerified ?? false;
         this.phoneNumber = data.phoneNumber ?? ""
         this.photoUrl = data.photoUrl ?? ""
+        this.signInDate = data.signInDate ?? new Date()
+        this.createdAt = data.createdAt ?? new Date()
     }
 
     // access to firebase.

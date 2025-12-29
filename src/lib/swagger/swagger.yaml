@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  title: 'H Dummy Api specification'
-  description: 'API documentation created using swagger-jsdoc'
+  title: "H Dummy Api specification"
+  description: "API documentation created using swagger-jsdoc"
   version: 1.1.0
 components:
   securitySchemes:
@@ -14,12 +14,10 @@ components:
       in: header
       name: x-api-key
 servers:
-  -
-    url: 'http://localhost:3000'
-    description: 'Local host server at port 3000'
-  -
-    url: 'http://localhost:8080'
-    description: 'Local host server at port 8080'
+  - url: "http://localhost:3000"
+    description: "Local host server at port 3000"
+  - url: "http://localhost:8080"
+    description: "Local host server at port 8080"
 paths:
   /v1/content/health:
     get:
@@ -28,65 +26,104 @@ paths:
       produces:
         - application/json
       responses:
-        '200':
-          description: 'inside content route'
+        "200":
+          description: "inside content route"
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message: {type: string, example: 'inside content route'}
+                  message: { type: string, example: "inside content route" }
   /v1/content/create:
     post:
       tags:
         - Content
-      summary: 'Create Content'
+      summary: "Create Content"
       description: "An API route to create content – uploads a file, stores it in Firebase Storage, and creates a content record in Firestore.\n**Requires both headers:** - Authorization: Bearer JWT - x-api-key: API key header\n"
       security:
-        -
-          Authorization: []
+        - Authorization: []
           x-api-key: []
       requestBody:
         required: true
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/CreateContentBody'
+              $ref: "#/components/schemas/CreateContentBody"
       responses:
-        '200':
-          description: 'Content created successfully'
+        "200":
+          description: "Content created successfully"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          description: 'Bad request'
+                $ref: "#/components/schemas/User"
+        "400":
+          description: "Bad request"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /v1/content/update:
     put:
       tags:
         - Content
-      summary: 'Update Content'
-      description: 'An API route to update content.'
+      summary: "Update Content"
+      description: "An API route to update content."
       security:
-        -
-          bearerAuth: []
+        - bearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateContentBody'
+              $ref: "#/components/schemas/UpdateContentBody"
       responses:
-        '200':
-          description: 'Some description...'
+        "200":
+          description: "Some description..."
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
+  /v1/content/data:
+    get:
+      tags:
+        - Content
+      summary: "Fetch Content"
+      description: "Fetch content filtered by type, visibility, and language."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          description: "Type of content to filter"
+          required: true
+          schema:
+            type: string
+          example: educational
+        - name: hidden
+          in: query
+          description: "Whether hidden content should be included"
+          required: true
+          schema:
+            type: boolean
+          example: false
+        - name: language
+          in: query
+          description: "Language of the content"
+          required: true
+          schema:
+            type: string
+          example: english
+      responses:
+        "200":
+          description: "Content fetched successfully"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Content"
+        "400":
+          description: "Bad request"
   /v1/quiz/health:
     get:
       tags:
@@ -94,100 +131,94 @@ paths:
       produces:
         - application/json
       responses:
-        '200':
-          description: 'inside quiz route'
+        "200":
+          description: "inside quiz route"
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message: {type: string, example: 'inside quiz route'}
+                  message: { type: string, example: "inside quiz route" }
   /v1/quiz:
     post:
       tags:
         - Quiz
-      summary: 'Create Quiz'
-      description: 'An API route to create a new quiz'
+      summary: "Create Quiz"
+      description: "An API route to create a new quiz"
       security:
-        -
-          bearerAuth: []
+        - bearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateQuizBody'
+              $ref: "#/components/schemas/CreateQuizBody"
       responses:
-        '200':
-          description: 'Some description...'
+        "200":
+          description: "Some description..."
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
   /v1/quiz/questions:
     post:
       tags:
         - Quiz
-      summary: 'Create Quiz Questions'
+      summary: "Create Quiz Questions"
       description: "An API route to create questions required for quiz. Only one question is allowed in each query.\n"
       security:
-        -
-          bearerAuth: []
+        - bearerAuth: []
       parameters:
-        -
-          name: quizId
+        - name: quizId
           in: query
-          description: 'The quizId of quiz being submitted'
+          description: "The quizId of quiz being submitted"
           required: true
           schema:
             type: string
-          example: '123'
+          example: "123"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SubmitQuizBody'
+              $ref: "#/components/schemas/SubmitQuizBody"
       responses:
-        '200':
-          description: 'Some description...'
+        "200":
+          description: "Some description..."
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
   /v1/quiz/result:
     get:
       tags:
         - Quiz
-      summary: 'Get Quiz Results'
-      description: 'An API route to fetch quiz results'
+      summary: "Get Quiz Results"
+      description: "An API route to fetch quiz results"
       security:
-        -
-          bearerAuth: []
+        - bearerAuth: []
       parameters:
-        -
-          name: quizId
+        - name: quizId
           in: query
-          description: 'The quizId of the attempted quiz'
+          description: "The quizId of the attempted quiz"
           required: true
           schema:
             type: string
-          example: '123'
-        -
-          name: submissionId
+          example: "123"
+        - name: submissionId
           in: query
-          description: 'The submissionId of the attempted quiz'
+          description: "The submissionId of the attempted quiz"
           required: true
           schema:
             type: string
-          example: '123'
+          example: "123"
       responses:
-        '200':
-          description: 'Some description...'
+        "200":
+          description: "Some description..."
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
   /v1/users/health:
     get:
       tags:
@@ -195,99 +226,99 @@ paths:
       produces:
         - application/json
       responses:
-        '200':
-          description: 'inside user route'
+        "200":
+          description: "inside user route"
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message: {type: string, example: 'inside user route'}
+                  message: { type: string, example: "inside user route" }
   /v1/users/create:
     post:
       tags:
         - Users
-      summary: 'Create User'
-      description: 'An API route to create users on Firebase'
+      summary: "Create User"
+      description: "An API route to create users on Firebase"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateBodyRequest'
+              $ref: "#/components/schemas/CreateBodyRequest"
       responses:
-        '201':
+        "201":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateBodyResponse'
+                $ref: "#/components/schemas/CreateBodyResponse"
               example:
-                message: 'User created successfully'
+                message: "User created successfully"
                 uid: 4gxbGh65tjWoHnuCNNpSCH4GjKv2
-        '400':
-          description: 'Bad Request'
+        "400":
+          description: "Bad Request"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 success: true
-                message: 'Bad Request'
-                errorCode: '400'
+                message: "Bad Request"
+                errorCode: "400"
   /v1/users/fetch:
     post:
       tags:
         - Users
-      summary: 'Fetch User Details'
-      description: 'An API route to fetch user details from Identity platform'
+      summary: "Fetch User Details"
+      description: "An API route to fetch user details from Identity platform"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/IdGenSchema'
+              $ref: "#/components/schemas/IdGenSchema"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 success: true
                 message: Ok
-                errorCode: '200'
-        '400':
-          description: 'Bad Request'
+                errorCode: "200"
+        "400":
+          description: "Bad Request"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 success: true
-                message: 'Bad Request'
-                errorCode: '400'
+                message: "Bad Request"
+                errorCode: "400"
   /v2/users/create:
     post:
       tags:
         - Users
-      summary: 'Create User'
-      description: 'An alternate API route to create users as well as update'
+      summary: "Create User"
+      description: "An alternate API route to create users as well as update"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateBodyRequest'
+              $ref: "#/components/schemas/CreateBodyRequest"
             examples:
               CreateUserExample:
-                $ref: '#/components/examples/CreateBodyExample'
+                $ref: "#/components/examples/CreateBodyExample"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateBodyResponse'
+                $ref: "#/components/schemas/CreateBodyResponse"
 tags: []

@@ -10,20 +10,19 @@ export class UserService {
     private collection = db.collection("users")
 
     async createUser(body: UserModel) {
-        const user: myUserRecord = {
-            email: body.email,
-            emailVerified: body.emailVerified ?? false,
-            password: body.password,
-            displayName: body.displayName,
-            disabled: body.disabled ?? false,
-        }
+        const user = {} as UserModel
+        user.email = body.email
+        user.emailVerified = body.emailVerified
+        user.password = body.password
+        user.displayName = body.displayName
+        user.disabled = body.disabled
 
         if (body?.phoneNumber) {
             user.phoneNumber = body.phoneNumber
         }
 
         const userRecord = await getAuth().createUser(user);
-        const userDoc: Partial<UserModelSchema> = {
+        const userDoc: Partial<UserModel> = {
             uid: userRecord.uid,
             email: userRecord.email,
             displayName: userRecord.displayName ?? "",
