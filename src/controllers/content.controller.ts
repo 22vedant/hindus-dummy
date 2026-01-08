@@ -6,23 +6,23 @@ const contentService = new ContentService()
 
 export const createContent = async (req: authMiddlewareInfoRequest, res: Response, next: NextFunction) => {
     try {
-        if (!req.file) {
-            return res.status(400).send("No file uploaded.");
-        }
+      if (!req.file) {
+        return res.status(400).send("No file uploaded.");
+      }
 
-        const uid = req.uid as string;
-        const body = req.body
-        const file = req.file
+      const uid = req.uid as string;
+      const body = req.body;
+      const file = req.file;
 
-        const result = await contentService.createContent(uid, body, file)
+      const result = await contentService.createContent(uid, body, file);
 
-        return res.status(200).json({
-            message: "Uploaded & stored successfully",
-            url: result.publicUrl,
-            fileName: result.fileName,
-            uid,
-            contentId: result?.contentId
-        });
+      return res.status(200).json({
+        message: "Uploaded & stored successfully",
+        url: result.publicUrl,
+        fileName: result.fileName,
+        uid,
+        contentId: result?.contentId,
+      });
     } catch (error) {
         next(error)
     }

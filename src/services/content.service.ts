@@ -109,7 +109,3 @@ export class ContentService {
         await this.collection.doc(contentId).update(updatePayload);
     }
 }
-
-export function createContent(createContent: any) {
-    throw new Error("Function not implemented.");
-}

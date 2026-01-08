@@ -61,7 +61,9 @@ quizRouter.get('/heatlh', (req, res) => {
  *               $ref: '#/components/schemas/User'
  */
 
-quizRouter.post('/create', userAuthMiddleware, apiKeyChecker, isAdmin, validate(createQuizSchema), quizController.createQuiz
+quizRouter.post('/create', userAuthMiddleware, apiKeyChecker, isAdmin,
+    // validate(createQuizSchema), 
+    quizController.createQuiz
 )
 
 /**

@@ -1,4 +1,5 @@
 #! /bin/bash
+set -o pipefail
 # write a script to seed the local emulator database and storage bucket with initially testing values
 
 echo "Hello, World!"
@@ -62,27 +63,56 @@ API_KEY=$(echo "$API_RESPONSE" | sed -n 's/.*"apiKey":"\([^"]*\)".*/\1/p')
 
 echo "API_KEY (required for almost all admin routes): $API_KEY"
 
-for i in {1..5}
-do
-    echo "Creating content $i with email ${EMAILS[0]}"
-      
-    CONTENT_RESPONSE=$(curl -sS "$BASE_URL/content/create" \
-      -H "Authorization: Bearer ${ID_TOKEN}" \
-      -H "x-api-key: $API_KEY" \
-      -F "file=@$FILE_PATH" \
-      -F "title=Test Content $i" \
-      -F "description=A description written for content $i" \
-      -F "language=english" \
-      -F "type=educational" \
-      -F "hidden=false"
-    )
+for i in {1..2}; do
+  echo "Creating content $i with email ${EMAILS[0]}"
 
-    CONTENT_ID=$(echo "$CONTENT_RESPONSE" | sed -n 's/.*"contentId":"\([^"]*\)".*/\1/p')
-    CONTENT_IDS+=("$CONTENT_ID")
-    echo ""
+  # Perform request and capture body + HTTP status
+  RESPONSE=$(curl -sS -w "\n%{http_code}" "$BASE_URL/content/create" \
+    -H "Authorization: Bearer ${ID_TOKEN}" \
+    -H "x-api-key: $API_KEY" \
+    -F "file=@$FILE_PATH" \
+    -F "title=Monk who sold his ferrari $i" \
+    -F "description=A description written for content $i" \
+    -F "language=english" \
+    -F "type=educational" \
+    -F "hidden=false"
+  )
 
+  CURL_EXIT_CODE=$?
+  HTTP_BODY=$(echo "$RESPONSE" | sed '$d')
+  HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+
+  # 1. Curl-level error (DNS, network, SSL, etc.)
+  if [ $CURL_EXIT_CODE -ne 0 ]; then
+    echo "❌ Curl failed for content $i (exit code: $CURL_EXIT_CODE)"
+    continue
+  fi
+
+  # 2. HTTP error from server
+  if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
+    echo "❌ HTTP error while creating content $i (status: $HTTP_CODE)"
+    echo "Response:"
+    echo "$HTTP_BODY"
+    continue
+  fi
+
+  # 3. Extract contentId safely
+  CONTENT_ID=$(echo "$HTTP_BODY" | sed -n 's/.*"contentId":"\([^"]*\)".*/\1/p')
+
+  if [ -z "$CONTENT_ID" ]; then
+    echo "❌ contentId not found in response for content $i"
+    echo "Response:"
+    echo "$HTTP_BODY"
+    continue
+  fi
+
+  CONTENT_IDS+=("$CONTENT_ID")
+  echo "✅ Created content $i with ID: $CONTENT_ID"
+  echo
 done
 
+echo "Created ${#CONTENT_IDS[@]} contents:"
+printf '%s\n' "${CONTENT_IDS[@]}"
 for i in {1..10}
 do
     curl "$BASE_URL/quiz/questions/create" \

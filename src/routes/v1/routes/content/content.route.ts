@@ -81,7 +81,7 @@ contentRouter.get("/health", (req, res) => {
 
 contentRouter.post("/create", userAuthMiddleware, apiKeyChecker, isAdmin,
   upload.single("file"),
-  validate(createContentSchema),
+  // validate(createContentSchema),
   contentController.createContent
 );
 

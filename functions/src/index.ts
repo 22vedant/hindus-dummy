@@ -12,6 +12,7 @@ dotenv.config()
 const app = initializeApp({ projectId: 'empdata-bf69b' })
 const messaging = getMessaging(app)
 import sgMail from '@sendgrid/mail'
+import { onDocumentCreated, onDocumentWritten } from "firebase-functions/firestore";
 sgMail.setApiKey(process.env.SENDGRID_API_KEY as string)
 
 interface quizGenBody {
@@ -167,3 +168,7 @@ export const helloWorld = onRequest((request, response) => {
     logger.info("Hello logs!", { structuredData: true });
     response.send("Hello from Firebase!");
 });
+
+export const onContentCreation = onDocumentWritten("content/{contentId}", (event) => {
+    logger.log(event.data)
+})
